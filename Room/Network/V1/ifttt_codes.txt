@@ -1,0 +1,38 @@
+yellow lights on	111			
+yellow lights off	110	s1,s8		
+							
+white lights on		121			
+white lights off	120	s2,s3,s4,s5	
+							
+fan on			131			
+fan off			130	s7		
+						
+extra button on		141			
+extra button off	140	s6		N
+			
+			
+			
+basin lights on		211			
+basin lights off	210	rfs1		
+						
+passage lights on	221			
+passage lights off	220	rfs2		
+							
+loft lights on		231			
+loft lights off		230	rfs3		
+							
+toilet lights on	241			
+toilet lights off	240	rfs4		
+							
+exhaust on		251			
+exhaust off		250	rfs5		
+							
+Heater on		261			
+Heater off		260	rfs6		
+	
+
+						
+all lights off		300	s1,s2,s3,s4,s5,s8,rfs1,rfs2,rfs3,rfs4
+everything off		310	s1 to rfs6
+chill mode		320	s1,s8
+work mode		330	s2,s3,s4,s5
