@@ -36,7 +36,7 @@
 
 
 /*Global Variables*/
-extern boolean switchRead_Buffer[];
+extern boolean SwitchRead_Buffer[];
 
 /*function declarations*/
 void gpio_init();

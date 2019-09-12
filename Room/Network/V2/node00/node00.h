@@ -10,7 +10,7 @@
 /*Global variables*/
 extern uint8_t panelOne_data;
 extern uint8_t panelTwo_data;
-extern boolean switchRead_Buffer[];
+extern boolean SwitchRead_Buffer[];
 
 /*local variables*/
 enum StructState

@@ -1,8 +1,13 @@
 #include "gpio.h"
 
 /*Global variables*/
-boolean switchRead_Buffer[8] = {0};
+boolean SwitchRead_Buffer[8] = {0};
+boolean flag = 0;
+
 /*Local Variables*/
+boolean currSwitchRead_Buffer[8] = {0};
+boolean prevSwitchRead_Buffer[8] = {0};
+uint8_t i = 0;
 enum StructSwitches
 {
   switch1,
@@ -14,7 +19,6 @@ enum StructSwitches
   switch7,
   switch8,
 };
-
 StructSwitches ReadSwitches = switch1;
 
 void gpio_init()
@@ -44,14 +48,26 @@ void read_switches()
     case switch1: //7
       PORTB |=  GPIOB_S2;
       delay(1);
-      switchRead_Buffer[0] = muxOPpin;
+      if (flag)
+        currSwitchRead_Buffer[i] = muxOPpin;
+      else
+        prevSwitchRead_Buffer[i] = muxOPpin;
+      if ((flag == 1) && (prevSwitchRead_Buffer[i] == currSwitchRead_Buffer[i]))
+        SwitchRead_Buffer[i] = muxOPpin;
       ReadSwitches = switch2;
+      i++;
       break;
 
     case switch2: //6
       PORTD &= ~GPIOD_S0;
       delay(1);
-      switchRead_Buffer[1] = muxOPpin;
+      if (flag)
+        currSwitchRead_Buffer[i] = muxOPpin;
+      else
+        prevSwitchRead_Buffer[i] = muxOPpin;
+      if ((flag == 1) && (prevSwitchRead_Buffer[i] == currSwitchRead_Buffer[i]))
+        SwitchRead_Buffer[i] = muxOPpin;
+      i++;
       ReadSwitches = switch3;
       break;
 
@@ -59,14 +75,26 @@ void read_switches()
       PORTD &= ~GPIOD_S1;
       PORTB &= ~GPIOB_S2;
       delay(1);
-      switchRead_Buffer[2] = muxOPpin;
+      if (flag)
+        currSwitchRead_Buffer[i] = muxOPpin;
+      else
+        prevSwitchRead_Buffer[i] = muxOPpin;
+      if ((flag == 1) && (prevSwitchRead_Buffer[i] == currSwitchRead_Buffer[i]))
+        SwitchRead_Buffer[i] = muxOPpin;
+      i++;
       ReadSwitches = switch4;
       break;
 
     case switch4: //1
       PORTD |=  GPIOD_S0;
       delay(1);
-      switchRead_Buffer[3] = muxOPpin;
+      if (flag)
+        currSwitchRead_Buffer[i] = muxOPpin;
+      else
+        prevSwitchRead_Buffer[i] = muxOPpin;
+      if ((flag == 1) && (prevSwitchRead_Buffer[i] == currSwitchRead_Buffer[i]))
+        SwitchRead_Buffer[i] = muxOPpin;
+      i++;
       ReadSwitches = switch5;
       break;
 
@@ -74,7 +102,13 @@ void read_switches()
       PORTD &= ~GPIOD_S0;
       PORTD |=  GPIOD_S1;
       delay(1);
-      switchRead_Buffer[4] = muxOPpin;
+      if (flag)
+        currSwitchRead_Buffer[i] = muxOPpin;
+      else
+        prevSwitchRead_Buffer[i] = muxOPpin;
+      if ((flag == 1) && (prevSwitchRead_Buffer[i] == currSwitchRead_Buffer[i]))
+        SwitchRead_Buffer[i] = muxOPpin;
+      i++;
       ReadSwitches = switch6;
       break;
 
@@ -83,14 +117,26 @@ void read_switches()
       PORTD &= ~GPIOD_S1;
       PORTB |=  GPIOB_S2;
       delay(1);
-      switchRead_Buffer[5] = muxOPpin;
+      if (flag)
+        currSwitchRead_Buffer[i] = muxOPpin;
+      else
+        prevSwitchRead_Buffer[i] = muxOPpin;
+      if ((flag == 1) && (prevSwitchRead_Buffer[i] == currSwitchRead_Buffer[i]))
+        SwitchRead_Buffer[i] = muxOPpin;
+      i++;
       ReadSwitches = switch7;
       break;
 
     case switch7:  //4
       PORTD &= ~GPIOD_S0;
       delay(1);
-      switchRead_Buffer[6] = muxOPpin;
+      if (flag)
+        currSwitchRead_Buffer[i] = muxOPpin;
+      else
+        prevSwitchRead_Buffer[i] = muxOPpin;
+      if ((flag == 1) && (prevSwitchRead_Buffer[i] == currSwitchRead_Buffer[i]))
+        SwitchRead_Buffer[i] = muxOPpin;
+      i++;
       ReadSwitches = switch8;
       break;
 
@@ -99,7 +145,14 @@ void read_switches()
       PORTD |=  GPIOD_S1;
       PORTB &= ~GPIOB_S2;
       delay(1);
-      switchRead_Buffer[7] = muxOPpin;
+      if (flag)
+        currSwitchRead_Buffer[i] = muxOPpin;
+      else
+        prevSwitchRead_Buffer[i] = muxOPpin;
+      if ((flag == 1) && (prevSwitchRead_Buffer[i] == currSwitchRead_Buffer[i]))
+        SwitchRead_Buffer[i] = muxOPpin;
+      i = 0;
+      flag = not flag;
       ReadSwitches = switch1;
       break;
   }
@@ -108,43 +161,43 @@ void read_switches()
 
 void write_Relays()
 {
-    if (switchRead_Buffer[5]) //fan
-      PORTD |=  GPIOD_R1;
-    else
-      PORTD &= ~GPIOD_R1;
-      
-    if (switchRead_Buffer[0]) //yi
-      PORTD |=  GPIOD_R2;
-    else
-      PORTD &= ~GPIOD_R2;
-      
-    if (switchRead_Buffer[1]) //2 w1
-      PORTC |=  GPIOC_R3;
-    else
-      PORTC &= ~GPIOC_R3;
-      
-    if (switchRead_Buffer[2]) //w2
-      PORTC |=  GPIOC_R4;
-    else
-      PORTC &= ~GPIOC_R4;
-      
-    if (switchRead_Buffer[3]) //w3
-      PORTC |=  GPIOC_R5;
-    else
-      PORTC &= ~GPIOC_R5;
-      
-    if (switchRead_Buffer[7]) //w4
-      PORTC |=  GPIOC_R6;
-    else
-      PORTC &= ~GPIOC_R6;
-      
-    if (switchRead_Buffer[4]) //w4
-      PORTC |=  GPIOC_R7;
-    else
-      PORTC &= ~GPIOC_R7;
-      
-    if (switchRead_Buffer[6]) //yo
-      PORTC |=  GPIOC_R8;
-    else
-      PORTC &= ~GPIOC_R8;
+  if (SwitchRead_Buffer[5]) //fan
+    PORTD |=  GPIOD_R1;
+  else
+    PORTD &= ~GPIOD_R1;
+
+  if (SwitchRead_Buffer[0]) //yi
+    PORTD |=  GPIOD_R2;
+  else
+    PORTD &= ~GPIOD_R2;
+
+  if (SwitchRead_Buffer[1]) //2 w1
+    PORTC |=  GPIOC_R3;
+  else
+    PORTC &= ~GPIOC_R3;
+
+  if (SwitchRead_Buffer[2]) //w2
+    PORTC |=  GPIOC_R4;
+  else
+    PORTC &= ~GPIOC_R4;
+
+  if (SwitchRead_Buffer[3]) //w3
+    PORTC |=  GPIOC_R5;
+  else
+    PORTC &= ~GPIOC_R5;
+
+  if (SwitchRead_Buffer[7]) //w4
+    PORTC |=  GPIOC_R6;
+  else
+    PORTC &= ~GPIOC_R6;
+
+  if (SwitchRead_Buffer[4]) //w4
+    PORTC |=  GPIOC_R7;
+  else
+    PORTC &= ~GPIOC_R7;
+
+  if (SwitchRead_Buffer[6]) //yo
+    PORTC |=  GPIOC_R8;
+  else
+    PORTC &= ~GPIOC_R8;
 }

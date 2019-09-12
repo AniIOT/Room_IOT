@@ -43,7 +43,8 @@ void loop()
       break;
 
     case readWifiData: //request from esp and read result
-      wifi_comm();
+      //      wifi_comm();
+      read_switches();
       //      if () //if panel 1
       //      {
       //        machine_state = writetoRelays;
@@ -52,7 +53,7 @@ void loop()
       //      if  //if panel 2
       //      {
       //        rf_comm();
-              machine_state = writetoRelays;
+      machine_state = writetoRelays;
       //      }
       break;
 
