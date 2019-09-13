@@ -1,6 +1,6 @@
 #define uartBaud 38400
-#define txmaxBytes
-#define rxmaxBytes 6
+#define txmaxBytes 4
+#define rxmaxBytes 2
 #define slave_add 130
 #define reqFuncCode 24
 #define sendData ((uint16_t)310)
@@ -19,10 +19,11 @@ void loop()
   {
     check = modbusCheckReq();
   }
-  if(check)
+  if (check)
   {
     delay(1);
     modbusSendData();
+    check = 0;
   }
 }
 
@@ -34,8 +35,7 @@ void modbusSendData()
   u8TxBuffer[i++] = slave_add;
   u8TxBuffer[i++] = reqFuncCode;
   u8TxBuffer[i++] = (unsigned char)(sendData & 0x00ff); //lsB
-  u8TxBuffer[i] = (unsigned char)((sendData>>8));  //msB
-  Serial.println(u8TxBuffer[3]);
+  u8TxBuffer[i] = (unsigned char)((sendData >> 8)); //msB
   tx_uart(u8TxBuffer, i);
 }
 
@@ -64,23 +64,27 @@ boolean modbusCheckReq()
   rx_uart(&pRxBuffer);
 
   u8ByteRead = *pRxBuffer++;
-  if(u8ByteRead != slave_add)
+  if (u8ByteRead != slave_add)
   {
+    memset(&pRxBuffer, 0, rxmaxBytes);
     return 0;
   }
 
   u8ByteRead = *pRxBuffer++;
-  if(u8ByteRead != reqFuncCode)
+  if (u8ByteRead != reqFuncCode)
   {
+    memset(&pRxBuffer, 0, rxmaxBytes);
     return 0;
   }
-   return 1;
+  memset(&pRxBuffer, 0, rxmaxBytes);
+  return 1;
 }
 
 
 boolean rx_uart(unsigned char** pcRxBuffer)
 {
   uint8_t rxDataCount = 0;
+//  while (!Serial3.available());
   if (Serial3.available() > 0)
   {
     while (rxDataCount < rxmaxBytes)

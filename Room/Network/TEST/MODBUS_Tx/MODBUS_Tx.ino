@@ -1,7 +1,7 @@
 #include <SoftwareSerial.h>
 #define uartBaud 38400
-#define txmaxBytes
-#define rxmaxBytes 6
+#define txmaxBytes 2
+#define rxmaxBytes 4
 #define slave_add 130
 #define reqFuncCode 24
 
@@ -15,6 +15,7 @@ void setup()
   Serial.begin(115200);
   eSerial.begin(uartBaud);
   eSerial.flush();
+  //  modbusReqData();
 }
 
 void loop()
@@ -23,20 +24,15 @@ void loop()
   uint8_t check = modbusReadData();
   while (!check)
   {
-//    modbusReqData();
     check = modbusReadData();
   }
   if (check)
   {
     Serial.print(u16Data, HEX);
     Serial.print(" ");
-    Serial.print(checkSlaveAdd);
-    checkSlaveAdd = 0;
-    Serial.println(checkSlaveAdd);
-    Serial.print(checkFunc);
-    checkFunc = 0;
-    Serial.println(checkFunc);
-//    while (1);
+    check = 0;
+    //    while (1);
+
   }
 }
 
@@ -47,7 +43,7 @@ void modbusReqData()
 
   u8TxBuffer[i++] = slave_add;
   u8TxBuffer[i] = reqFuncCode;
-  
+
   tx_uart(u8TxBuffer, (uint16_t)i);
 }
 
@@ -72,6 +68,7 @@ void tx_uart(unsigned char *packet, uint16_t packetlength)
 boolean rx_uart(unsigned char** pcRxBuffer)
 {
   uint8_t rxDataCount = 0;
+//  while (!eSerial.available());
   if (eSerial.available() > 0)
   {
     while (rxDataCount < rxmaxBytes)
@@ -94,19 +91,22 @@ boolean modbusReadData()
   u8ByteRead = *pRxBuffer++;
   if (u8ByteRead != slave_add)
   {
+    memset(&pRxBuffer, 0, rxmaxBytes);
     return 0;
   }
-  checkSlaveAdd = u8ByteRead;
 
   u8ByteRead = *pRxBuffer++;
   if (u8ByteRead != reqFuncCode)
   {
+    memset(&pRxBuffer, 0, rxmaxBytes);
     return 0;
   }
-  checkFunc = u8ByteRead;
 
   u16Data = (*pRxBuffer++);
   u16Data |= (*pRxBuffer++) << 8;
+  
+  memset(&pRxBuffer, 0, rxmaxBytes);
+  
   if (u16Data < 400)
     return 1;
   else
