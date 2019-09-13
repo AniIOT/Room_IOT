@@ -4,7 +4,7 @@ void setup()
 {
   //gpio initialization
   gpio_init();
-
+  
   //nrf-spi initialization
   //  spi_init();
 
@@ -14,7 +14,7 @@ void setup()
   //watchdog initialization
   //  wdg_init();
 #if testenable
-  Serial.begin(9600);
+  Serial.begin(115200);
   pinMode(2, INPUT);
   Serial.println("Test Mode");
 #endif
@@ -24,16 +24,16 @@ void setup()
 void loop()
 {
 #if testenable
-  read_switches();
-  Serial.println("");
-  Serial.print(switchRead_Buffer[0]);
-  Serial.print(switchRead_Buffer[1]);
-  Serial.print(switchRead_Buffer[2]);
-  Serial.print(switchRead_Buffer[3]);
-  Serial.print(switchRead_Buffer[4]);
-  Serial.print(switchRead_Buffer[5]);
-  Serial.print(switchRead_Buffer[6]);
-  Serial.print(switchRead_Buffer[7]);
+  //  read_switches();
+  //  Serial.println("");
+  //  Serial.print(SwitchRead_Buffer[0]);
+  //  Serial.print(SwitchRead_Buffer[1]);
+  //  Serial.print(SwitchRead_Buffer[2]);
+  //  Serial.print(SwitchRead_Buffer[3]);
+  //  Serial.print(SwitchRead_Buffer[4]);
+  //  Serial.print(SwitchRead_Buffer[5]);
+  //  Serial.print(SwitchRead_Buffer[6]);
+  //  Serial.print(SwitchRead_Buffer[7]);
 #else
   switch (machine_state)
   {
@@ -44,7 +44,6 @@ void loop()
 
     case readWifiData: //request from esp and read result
       //      wifi_comm();
-      read_switches();
       //      if () //if panel 1
       //      {
       //        machine_state = writetoRelays;
