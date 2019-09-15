@@ -1,39 +1,41 @@
-#include <SoftwareSerial.h>
+#include <NeoSWSerial.h>
+
+NeoSWSerial eSerial( 4, 5 );
+
+//#include <SoftwareSerial.h>
 #define uartBaud 38400
 #define txmaxBytes 2
 #define rxmaxBytes 4
 #define slave_add 130
 #define reqFuncCode 24
 
-SoftwareSerial eSerial(4, 5);
+//SoftwareSerial eSerial(4, 5);
 uint16_t u16Data = 0;
-uint8_t u8DataOne = 0, u8DataTwo = 0;
-uint8_t checkSlaveAdd = 0, checkFunc = 0;
+uint8_t rxCount = 0;
+unsigned char rxBuffer[rxmaxBytes];
+
+
+static void uart_isr(unsigned char c)
+{
+  rxBuffer[rxCount] = (unsigned char)c;
+  rxCount++;
+}
 
 void setup()
 {
   Serial.begin(115200);
+  eSerial.attachInterrupt(uart_isr);
   eSerial.begin(uartBaud);
-  eSerial.flush();
-  //  modbusReqData();
+  modbusReqData();
 }
 
 void loop()
 {
-  modbusReqData();
-  uint8_t check = modbusReadData();
-  while (!check)
-  {
-    check = modbusReadData();
-  }
-  if (check)
-  {
-    Serial.print(u16Data, HEX);
-    Serial.print(" ");
-    check = 0;
-    //    while (1);
-
-  }
+  while (rxCount < 4)
+    delay(1);
+  modbusReadData(rxBuffer);
+  Serial.println(u16Data);
+  while (1);
 }
 
 void modbusReqData()
@@ -56,7 +58,7 @@ void tx_uart(unsigned char *packet, uint16_t packetlength)
 
   while (iBytes <= packetlength)
   {
-    while (eSerial.available()); //while used wait
+    //    while (eSerial.available()); //while used wait
     dataBuff = *(pTxbuf++);
     eSerial.write(dataBuff);
     iBytes++;
@@ -65,28 +67,9 @@ void tx_uart(unsigned char *packet, uint16_t packetlength)
   }
 }
 
-boolean rx_uart(unsigned char** pcRxBuffer)
+boolean modbusReadData(unsigned char* pRxBuffer)
 {
-  uint8_t rxDataCount = 0;
-//  while (!eSerial.available());
-  if (eSerial.available() > 0)
-  {
-    while (rxDataCount < rxmaxBytes)
-    {
-      *(pcRxBuffer++) = eSerial.read();
-      rxDataCount++;
-    }
-  }
-  return 1;
-}
-
-boolean modbusReadData()
-{
-  boolean stat = 0;
-  static unsigned char* pRxBuffer = 0;
   unsigned char u8ByteRead = 0;
-
-  rx_uart(&pRxBuffer);
 
   u8ByteRead = *pRxBuffer++;
   if (u8ByteRead != slave_add)
@@ -104,11 +87,7 @@ boolean modbusReadData()
 
   u16Data = (*pRxBuffer++);
   u16Data |= (*pRxBuffer++) << 8;
-  
+
   memset(&pRxBuffer, 0, rxmaxBytes);
-  
-  if (u16Data < 400)
-    return 1;
-  else
-    return 0;
+  return 1;
 }
