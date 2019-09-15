@@ -15,13 +15,9 @@ void setup()
 void loop()
 {
   if (Serial3.available())
-    //    Serial.println(Serial3.read());
-    //  Serial.println(Serial3.read());
+  {
     check = modbusCheckReq();
-  //  while (!check)
-  //  {
-  //    check = modbusCheckReq();
-  //  }
+  }
   if (check)
   {
     Serial.print("check");
@@ -51,7 +47,7 @@ void tx_uart(unsigned char *packet, uint16_t packetlength)
 
   while (iBytes <= packetlength)
   {
-//    while (Serial3.available()); //while used wait
+    //    while (Serial3.available()); //while used wait
     dataBuff = *(pTxbuf++);
     Serial3.write(dataBuff);
     iBytes++;
@@ -73,7 +69,7 @@ boolean modbusCheckReq()
     memset(rxBuff, 0, rxmaxBytes);
     return 0;
   }
-  
+
   u8ByteRead = rxBuff[1];
   if (u8ByteRead != reqFuncCode)
   {

@@ -31,7 +31,7 @@ void setup()
 
 void loop()
 {
-  while (rxCount < 4)
+  while (rxCount < rxmaxBytes)
     delay(1);
   modbusReadData(rxBuffer);
   Serial.println(u16Data);
