@@ -24,16 +24,16 @@ void setup()
 void loop()
 {
 #if testenable
-  //  read_switches();
-  //  Serial.println("");
-  //  Serial.print(SwitchRead_Buffer[0]);
-  //  Serial.print(SwitchRead_Buffer[1]);
-  //  Serial.print(SwitchRead_Buffer[2]);
-  //  Serial.print(SwitchRead_Buffer[3]);
-  //  Serial.print(SwitchRead_Buffer[4]);
-  //  Serial.print(SwitchRead_Buffer[5]);
-  //  Serial.print(SwitchRead_Buffer[6]);
-  //  Serial.print(SwitchRead_Buffer[7]);
+    read_switches();
+    Serial.println("");
+    Serial.print(SwitchRead_Buffer[0]);
+    Serial.print(SwitchRead_Buffer[1]);
+    Serial.print(SwitchRead_Buffer[2]);
+    Serial.print(SwitchRead_Buffer[3]);
+    Serial.print(SwitchRead_Buffer[4]);
+    Serial.print(SwitchRead_Buffer[5]);
+    Serial.print(SwitchRead_Buffer[6]);
+    Serial.print(SwitchRead_Buffer[7]);
 #else
   switch (machine_state)
   {
