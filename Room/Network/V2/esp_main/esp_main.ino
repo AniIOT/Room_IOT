@@ -1,16 +1,17 @@
+#include <ESP8266WiFi.h>
 #include "Adafruit_MQTT.h"
 #include "Adafruit_MQTT_Client.h"
-#include <WiFiClient.h>
-#include <WiFiServer.h>
-#include <WiFiUdp.h>
-#include "ESP8266WiFi.h"
 
+/************************* WiFi Access Point *********************************/
 #define WLAN_SSID       "Private"
 #define WLAN_PASS       "A342320D"
+
+/************************* Adafruit.io Setup *********************************/
 #define AIO_SERVER      "io.adafruit.com"
 #define AIO_SERVERPORT  1883
 #define AIO_USERNAME    "AniIOT"
 #define AIO_KEY         "1d2f2a184b57420e9f95b216d614a181"
+
 
 #define uartBaud 38400
 #define txmaxBytes 4
@@ -21,16 +22,30 @@
 /*Global-Variables*/
 boolean check = 0;
 boolean newData = 0;
-unsigned long setCount = 0;
-unsigned char RxBuffer[rxmaxBytes] = {0};
 uint8_t rxCount = 0;
 
 /*local-variables*/
-uint16_t u16Data = 0, m16Data = 0, pm16Data = 0;
+uint16_t u16Data = 0, data_len = 0;
+char m16Data[5] = {0};
 
 WiFiClient client;
 Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
 Adafruit_MQTT_Subscribe Lights = Adafruit_MQTT_Subscribe(&mqtt, AIO_USERNAME "/feeds/LightD", MQTT_QOS_1);
+
+void mqtt_connect();
+void modbusSendData(uint16_t u16Data);
+void tx_uart(unsigned char *packet, uint16_t packetlength);
+
+void lightscallback(char *data, uint16_t len) 
+{
+  while (data_len < len)
+  {
+    m16Data[data_len++] = *data++;
+  }
+  m16Data[data_len] = '\0';
+  u16Data = atoi(m16Data);
+  data_len = 0;
+}
 
 void setup()
 {
@@ -40,46 +55,25 @@ void setup()
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
   }
-
+  Lights.setCallback(lightscallback);
   mqtt.subscribe(&Lights);
-
-  /*Timeout timer initialization*/  /*will be replaced by watchdog*/
-  setCount = millis();
 }
 
 void loop()
 {
-  unsigned long currentCount = 0;
-  currentCount = millis();
-  if ( currentCount >= setCount + 150000) //5 second timeout
+  while(u16Data == 0)
   {
-    ESP.restart();
-  }
-
-  /*Get-MQTT-Data*/
-  mqtt_connect();
-  pm16Data = m16Data;
-  while (pm16Data == m16Data)
-  {
-    Adafruit_MQTT_Subscribe *subscription;
-    while ((subscription = mqtt.readSubscription(500)))
-    {
-      if (subscription == &Lights)
-      {
-        m16Data = atoi((char *)Lights.lastread);
-      }
-    }
-    /*Health-Check*/
-    if (!mqtt.ping())
-    {
-      mqtt.disconnect();
-    }
-
+    mqtt_connect();
+    mqtt.processPackets(2000);
+    mqtt.ping();
   }
 
   /*Send-Data-to-MuC*/
-  modbusSendData(m16Data);
-
+  if (u16Data != 0)
+  {
+    modbusSendData(u16Data);
+    u16Data = 0;
+  }
 }
 
 void mqtt_connect()
@@ -120,7 +114,7 @@ void tx_uart(unsigned char *packet, uint16_t packetlength)
   while (iBytes <= packetlength)
   {
     dataBuff = *(pTxbuf++);
-    Serial.write((unsigned char)dataBuff);
+    Serial.print((unsigned char)dataBuff);
     iBytes++;
     Serial.flush();
     delay(1);
