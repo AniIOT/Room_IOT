@@ -19,14 +19,8 @@
 #define slave_add 130
 #define Func_Code 24
 
-/*Global-Variables*/
-boolean check = 0;
-boolean newData = 0;
-uint8_t rxCount = 0;
-
 /*local-variables*/
-uint16_t u16Data = 0, data_len = 0;
-char m16Data[5] = {0};
+uint16_t u16Data = 0;
 
 WiFiClient client;
 Adafruit_MQTT_Client mqtt(&client, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
@@ -36,15 +30,19 @@ void mqtt_connect();
 void modbusSendData(uint16_t u16Data);
 void tx_uart(unsigned char *packet, uint16_t packetlength);
 
-void lightscallback(char *data, uint16_t len) 
+void lightscallback(char *data, uint16_t len)
 {
+  uint16_t data_len = 0;
+  char m16Data[5] = {0};
   while (data_len < len)
   {
     m16Data[data_len++] = *data++;
   }
   m16Data[data_len] = '\0';
   u16Data = atoi(m16Data);
+  modbusSendData(u16Data);
   data_len = 0;
+  u16Data = 0;
 }
 
 void setup()
@@ -61,19 +59,11 @@ void setup()
 
 void loop()
 {
-  while(u16Data == 0)
-  {
-    mqtt_connect();
-    mqtt.processPackets(2000);
-    mqtt.ping();
-  }
-
-  /*Send-Data-to-MuC*/
-  if (u16Data != 0)
-  {
-    modbusSendData(u16Data);
-    u16Data = 0;
-  }
+  mqtt_connect();
+  mqtt.processPackets(10000);
+  mqtt.ping();
+  //call to watchdog reset
+  //reset_wdt();
 }
 
 void mqtt_connect()
@@ -114,7 +104,7 @@ void tx_uart(unsigned char *packet, uint16_t packetlength)
   while (iBytes <= packetlength)
   {
     dataBuff = *(pTxbuf++);
-    Serial.print((unsigned char)dataBuff);
+    Serial.write((unsigned char)dataBuff);
     iBytes++;
     Serial.flush();
     delay(1);
