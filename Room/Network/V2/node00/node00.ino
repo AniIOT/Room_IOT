@@ -7,12 +7,13 @@
 
 boolean wifiBuffer[8] = {0};
 boolean switchBuffer[8] = {0};
+boolean rfBuffer[8] = {0};
 
 void setup()
 {
   //gpio initialization
   gpio_init();
-  
+
   //nrf-spi initialization
   //  rf_init();
 
@@ -33,7 +34,8 @@ void loop()
       break;
 
     case readWifiData: //request from esp and read result
-      //      if (wifi_comm() == true) //if panel 1
+            wifi_comm();
+            
       //      {
       //        machine_state = writetoRelays;
       //      }
@@ -47,6 +49,11 @@ void loop()
     case writetoRelays:  //write final value to appliances
       write_Relays();
       wdg_reset();
+      machine_state = writetoRF;
+      break;
+
+    case writetoRF:
+      //    rf_comm();
       machine_state = readSwitches;
       break;
   }

@@ -9,6 +9,7 @@ enum StructState
   readSwitches,
   readWifiData,
   writetoRelays,
+  writetoRF,
 };
 //state initialization
 StructState machine_state = readWifiData;

@@ -65,14 +65,14 @@ bool modbusReadData(unsigned char* pRxBuffer)
   if (u8ByteRead != slave_add)
   {
     memset(&pRxBuffer, 0, rxmaxBytes);
-    return 0;
+    return false;
   }
 
   u8ByteRead = *pRxBuffer++;
   if (u8ByteRead != reqFuncCode)
   {
     memset(&pRxBuffer, 0, rxmaxBytes);
-    return 0;
+    return false;
   }
 
   u16Data = (*pRxBuffer++);
@@ -80,5 +80,5 @@ bool modbusReadData(unsigned char* pRxBuffer)
 
   memset(&pRxBuffer, 0, rxmaxBytes);
   receivedFlag = false;
-  return 1;
+  return true;
 }
