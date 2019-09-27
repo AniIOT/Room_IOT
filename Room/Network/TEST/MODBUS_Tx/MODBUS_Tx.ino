@@ -3,27 +3,23 @@
 NeoSWSerial eSerial( 4, 5 );
 
 #define uartBaud 38400
-#define txmaxBytes 2
 #define rxmaxBytes 4
 #define slave_add 130
 #define reqFuncCode 24
 
+bool receivedFlag = false;
 uint16_t u16Data = 0;
-uint8_t rxCount = 0;
 unsigned char rxBuffer[rxmaxBytes];
 
 
 static void uart_isr(unsigned char c)
-{
-  Serial.print(c);
-  rxBuffer[rxCount] = (unsigned char)c;
-  if (rxCount < rxmaxBytes)
-  {
-    rxCount++;
-  }
-  else
+{  
+  static uint8_t rxCount = 0;
+  rxBuffer[rxCount++] = (unsigned char)c;
+  if (rxCount >= rxmaxBytes)
   {
     rxCount = 0;
+    receivedFlag = true;
   }
 }
 
@@ -36,13 +32,11 @@ void setup()
 
 void loop()
 {
-  while (rxCount < rxmaxBytes)
+  if (receivedFlag)
   {
-    delay(100);
-  }
-  if (modbusReadData(rxBuffer))
-  {
-    Serial.println(u16Data);
+    modbusReadData(rxBuffer);
+    Serial.println((uint16_t)u16Data);
+    receivedFlag = false;
   }
 }
 

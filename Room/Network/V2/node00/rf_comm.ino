@@ -1,14 +1,15 @@
-#include "gpio.h"
-
-void spi_init()
-{
-  RF24 radio(GPIOB_CE, GPIOB_CSN);
-  RF24Network network(radio);
-  radio.begin();
-  network.begin(90, THIS_NODE);
-}
-
-void rf_comm()
-{
-  
-}
+//#include "gpio.h"
+//#include "rf_comm.h"
+//
+//void rf_init()
+//{
+//  RF24 radio(GPIOB_CE, GPIOB_CSN);
+//  RF24Network network(radio);
+//  radio.begin();
+//  network.begin(90, THIS_NODE);
+//}
+//
+//void rf_comm()
+//{
+//  
+//}

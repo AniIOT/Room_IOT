@@ -1,4 +1,12 @@
 #include "node00.h"
+#include "rf_comm.h"
+#include "wifi_comm.h"
+#include "gpio.h"
+#include "uart.h"
+#include "wdg.h"
+
+boolean wifiBuffer[8] = {0};
+boolean switchBuffer[8] = {0};
 
 void setup()
 {
@@ -6,35 +14,17 @@ void setup()
   gpio_init();
   
   //nrf-spi initialization
-  //  spi_init();
+  //  rf_init();
 
   //wifi-uart initialization
-  //  uart_init();
+  uart_init();
 
   //watchdog initialization
   //  wdg_init();
-#if testenable
-  Serial.begin(115200);
-  pinMode(2, INPUT);
-  Serial.println("Test Mode");
-#endif
-
 }
 
 void loop()
 {
-#if testenable
-    read_switches();
-    Serial.println("");
-    Serial.print(SwitchRead_Buffer[0]);
-    Serial.print(SwitchRead_Buffer[1]);
-    Serial.print(SwitchRead_Buffer[2]);
-    Serial.print(SwitchRead_Buffer[3]);
-    Serial.print(SwitchRead_Buffer[4]);
-    Serial.print(SwitchRead_Buffer[5]);
-    Serial.print(SwitchRead_Buffer[6]);
-    Serial.print(SwitchRead_Buffer[7]);
-#else
   switch (machine_state)
   {
     case readSwitches:  //read current state of switches
@@ -43,13 +33,11 @@ void loop()
       break;
 
     case readWifiData: //request from esp and read result
-      //      wifi_comm();
-      //      if () //if panel 1
+      //      if (wifi_comm() == true) //if panel 1
       //      {
       //        machine_state = writetoRelays;
       //      }
-      //
-      //      if  //if panel 2
+      //      else //if panel 2
       //      {
       //        rf_comm();
       machine_state = writetoRelays;
@@ -63,5 +51,4 @@ void loop()
       break;
   }
 
-#endif
 }

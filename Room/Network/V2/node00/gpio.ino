@@ -186,3 +186,106 @@ void write_Relays()
   else
     PORTC &= ~GPIOC_R8;
 }
+
+
+//void read_switches(boolean* switchBuffer)
+//{
+//  switch (ReadSwitches)
+//  {
+//    case switch1: //7
+//      PORTB |=  GPIOB_S2;
+//      delay(1);
+//      if (flag)
+//        currSwitchRead_Buffer[i] = muxOPpin;
+//      else
+//        prevSwitchRead_Buffer[i] = muxOPpin;
+//      if ((flag == 1) && (prevSwitchRead_Buffer[i] == currSwitchRead_Buffer[i]))
+//        *switchBuffer++ = prevSwitchRead_Buffer[i];
+//      i++;
+//
+//    case switch2: //6
+//      PORTD &= ~GPIOD_S0;
+//      delay(1);
+//      if (flag)
+//        currSwitchRead_Buffer[i] = muxOPpin;
+//      else
+//        prevSwitchRead_Buffer[i] = muxOPpin;
+//      if ((flag == 1) && (prevSwitchRead_Buffer[i] == currSwitchRead_Buffer[i]))
+//        *switchBuffer++ = prevSwitchRead_Buffer[i];
+//      i++;
+//
+//    case switch3: //0
+//      PORTD &= ~GPIOD_S1;
+//      PORTB &= ~GPIOB_S2;
+//      delay(1);
+//      if (flag)
+//        currSwitchRead_Buffer[i] = muxOPpin;
+//      else
+//        prevSwitchRead_Buffer[i] = muxOPpin;
+//      if ((flag == 1) && (prevSwitchRead_Buffer[i] == currSwitchRead_Buffer[i]))
+//        *switchBuffer++ = prevSwitchRead_Buffer[i];
+//      i++;
+//
+//    case switch4: //1
+//      PORTD |=  GPIOD_S0;
+//      delay(1);
+//      if (flag)
+//        currSwitchRead_Buffer[i] = muxOPpin;
+//      else
+//        prevSwitchRead_Buffer[i] = muxOPpin;
+//      if ((flag == 1) && (prevSwitchRead_Buffer[i] == currSwitchRead_Buffer[i]))
+//        *switchBuffer++ = prevSwitchRead_Buffer[i];
+//      i++;
+//
+//    case switch5: //2
+//      PORTD &= ~GPIOD_S0;
+//      PORTD |=  GPIOD_S1;
+//      delay(1);
+//      if (flag)
+//        currSwitchRead_Buffer[i] = muxOPpin;
+//      else
+//        prevSwitchRead_Buffer[i] = muxOPpin;
+//      if ((flag == 1) && (prevSwitchRead_Buffer[i] == currSwitchRead_Buffer[i]))
+//        *switchBuffer++ = prevSwitchRead_Buffer[i];
+//      i++;
+//
+//    case switch6: //5
+//      PORTD |=  GPIOD_S0;
+//      PORTD &= ~GPIOD_S1;
+//      PORTB |=  GPIOB_S2;
+//      delay(1);
+//      if (flag)
+//        currSwitchRead_Buffer[i] = muxOPpin;
+//      else
+//        prevSwitchRead_Buffer[i] = muxOPpin;
+//      if ((flag == 1) && (prevSwitchRead_Buffer[i] == currSwitchRead_Buffer[i]))
+//        *switchBuffer++ = prevSwitchRead_Buffer[i];
+//      i++;
+//
+//    case switch7:  //4
+//      PORTD &= ~GPIOD_S0;
+//      delay(1);
+//      if (flag)
+//        currSwitchRead_Buffer[i] = muxOPpin;
+//      else
+//        prevSwitchRead_Buffer[i] = muxOPpin;
+//      if ((flag == 1) && (prevSwitchRead_Buffer[i] == currSwitchRead_Buffer[i]))
+//        *switchBuffer++ = prevSwitchRead_Buffer[i];
+//      i++;
+//
+//    case switch8: //3
+//      PORTD |=  GPIOD_S0;
+//      PORTD |=  GPIOD_S1;
+//      PORTB &= ~GPIOB_S2;
+//      delay(1);
+//      if (flag)
+//        currSwitchRead_Buffer[i] = muxOPpin;
+//      else
+//        prevSwitchRead_Buffer[i] = muxOPpin;
+//      if ((flag == 1) && (prevSwitchRead_Buffer[i] == currSwitchRead_Buffer[i]))
+//        *switchBuffer++ = prevSwitchRead_Buffer[i];
+//      i = 0;
+//      flag = not flag;
+//      break;
+//  }
+//}

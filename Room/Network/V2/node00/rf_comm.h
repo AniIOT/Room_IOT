@@ -4,5 +4,5 @@
 
 #define THIS_NODE         ((uint8_t)0x00)
 
-void spi_init();
+void rf_init();
 void rf_comm();

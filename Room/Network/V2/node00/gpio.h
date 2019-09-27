@@ -41,4 +41,5 @@ extern boolean SwitchRead_Buffer[];
 /*function declarations*/
 void gpio_init();
 void read_switches();
+//void read_switches(boolean* switchBuffer);
 void write_Relays();

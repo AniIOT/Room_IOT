@@ -1,74 +1,84 @@
-//#include "uart.h"
-//
-//SoftwareSerial eSerial(GPIOD_RX, GPIOD_TX);
-//uint16_t u16Data = 0;
-//
-//void uart_init()
-//{
-//  eSerial.begin(uartBaud); //rate could be changed
-//}
-//
-//void tx_uart(unsigned char *packet, uint16_t packetlength)
-//{
-//  uint16_t iBytes = 0;
-//  unsigned char dataBuff;
-//  unsigned char* pTxbuf = packet;
-//
-//  while (iBytes < packetlength)
-//  {
-//    while (eSerial.available()); //while used wait
-//    dataBuff = *(pTxbuf++);
-//    eSerial.write(dataBuff);
-//    iBytes++;
-//  }
-//}
-//
-//boolean rx_uart(unsigned char** pcRxBuffer)
-//{
-//  uint8_t rxDataCount = 0;
-//  if (eSerial.available() > 0)
-//  {
-//    while (rxDataCount < rxmaxBytes)
-//    {
-//      *(pcRxBuffer++) = eSerial.read();
-//      rxDataCount++;
-//    }
-//  }
-//  return 1;
-//}
-//
-//void modbusReqData()
-//{
-//  unsigned char u8TxBuffer[txmaxBytes] = {0};
-//  unsigned char i = 0;
-//  uint16_t u16CRC = 0;
-//
-//  u8TxBuffer[i++] = slave_add;
-//  u8TxBuffer[i] = reqFuncCode;
-//
-//  tx_uart(u8TxBuffer, i);
-//}
-//
-//void modbusReadData()
-//{
-//  boolean stat = 0;
-//  static unsigned char* pRxBuffer = 0;
-//  unsigned char u8ByteRead = 0;
-//
-//  rx_uart(&pRxBuffer);
-//
-//  u8ByteRead = *pRxBuffer++;
-//  if(u8ByteRead != slave_add)
-//  {
-//    return;
-//  }
-//
-//  u8ByteRead = *pRxBuffer++;
-//  if(u8ByteRead != reqFuncCode)
-//  {
-//    return;
-//  }
-//
-//  u16Data = ((*pRxBuffer++)<<8);
-//  u16Data += *pRxBuffer++;  
-//}
+#include "uart.h"
+#include <NeoSWSerial.h>
+
+#define uartBaud 38400
+#define txmaxBytes 
+#define rxmaxBytes 6
+#define slave_add 130
+#define reqFuncCode 24
+
+NeoSWSerial eSerial( 4, 5 );
+
+uint16_t u16Data = 0;
+bool receivedFlag = false;
+unsigned char rxBuffer[rxmaxBytes];
+
+static void uart_isr(unsigned char c)
+{
+  Serial.print(c);
+  static uint8_t rxCount = 0;
+  rxBuffer[rxCount++] = (unsigned char)c;
+  if (rxCount >= rxmaxBytes)
+  {
+    rxCount = 0;
+    receivedFlag = true;
+  }
+}
+
+void uart_init()
+{
+  Serial.begin(115200);
+  eSerial.attachInterrupt(uart_isr);
+  eSerial.begin(uartBaud); //rate could be changed
+}
+
+bool checkData()
+{  
+  if (receivedFlag)
+  {
+    if (modbusReadData(rxBuffer))
+    {
+      return true;
+    }
+    else
+    {
+      receivedFlag = false;
+      return false;
+    }
+  }
+  else
+  {
+    return false;
+  }  
+}
+
+uint16_t getData()
+{
+  return u16Data;
+}
+
+bool modbusReadData(unsigned char* pRxBuffer)
+{
+  unsigned char u8ByteRead = 0;
+
+  u8ByteRead = *pRxBuffer++;
+  if (u8ByteRead != slave_add)
+  {
+    memset(&pRxBuffer, 0, rxmaxBytes);
+    return 0;
+  }
+
+  u8ByteRead = *pRxBuffer++;
+  if (u8ByteRead != reqFuncCode)
+  {
+    memset(&pRxBuffer, 0, rxmaxBytes);
+    return 0;
+  }
+
+  u16Data = (*pRxBuffer++);
+  u16Data |= (*pRxBuffer++) << 8;
+
+  memset(&pRxBuffer, 0, rxmaxBytes);
+  receivedFlag = false;
+  return 1;
+}
