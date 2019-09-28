@@ -1,9 +1,4 @@
-/*Includes*/
-#include "rf_comm.h"
-#include "gpio.h"
-#include "wdg.h"
-
-#define testenable 0 
+#define testenable 0
 
 /*Global variables*/
 extern boolean SwitchRead_Buffer[];
@@ -12,8 +7,9 @@ extern boolean SwitchRead_Buffer[];
 enum StructState
 {
   readSwitches,
-  readRfData,
+  readWifiData,
   writetoRelays,
+  writetoRF,
 };
 //state initialization
-StructState machine_state = readSwitches;
+StructState machine_state = readWifiData;

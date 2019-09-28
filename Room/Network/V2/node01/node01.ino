@@ -1,4 +1,13 @@
 #include "node01.h"
+#include "rf_comm.h"
+#include "wifi_comm.h"
+#include "gpio.h"
+#include "uart.h"
+#include "wdg.h"
+
+boolean wifiBuffer[16] = {0};
+boolean switchBuffer[8] = {0};
+boolean rfBuffer[8] = {0};
 
 void setup()
 {
@@ -6,56 +15,38 @@ void setup()
   gpio_init();
 
   //nrf-spi initialization
-  //  spi_init();
+  //  rf_init();
+
+  //wifi-uart initialization
+  uart_init();
 
   //watchdog initialization
   //  wdg_init();
-#if testenable
-  //  pinMode(8,INPUT);
-  //  pinMode(7,INPUT);
-  //  pinMode(6,INPUT);
-  //  pinMode(5,INPUT);
-  //  pinMode(4,INPUT);
-  Serial.begin(115200);
-  Serial.println("Test Mode");
-#endif
-  Serial.begin(115200);
 }
 
 void loop()
 {
-#if testenable
-  read_switches();
-  Serial.print(SwitchRead_Buffer[0]);
-  Serial.print(SwitchRead_Buffer[1]);
-  Serial.print(SwitchRead_Buffer[2]);
-  Serial.print(SwitchRead_Buffer[3]);
-  Serial.println(SwitchRead_Buffer[4]);
-  write_Relays();
-
-  //  Serial.print(digitalRead(8));
-  //  Serial.print(digitalRead(7));
-  //  Serial.print(digitalRead(6));
-  //  Serial.print(digitalRead(5));
-  //  Serial.println(digitalRead(4));
-#else
   switch (machine_state)
   {
     case readSwitches:  //read current state of switches
       read_switches();
-      machine_state = readRfData;
+      machine_state = readWifiData;
       break;
 
-    case readRfData: //request from nrf and process data
-      rf_comm();
+    case readWifiData: //read and process data from mqtt broker
+      wifi_comm();
       machine_state = writetoRelays;
       break;
 
     case writetoRelays:  //write final value to appliances
       write_Relays();
-      wdg_reset();
+      machine_state = writetoRF;
+      break;
+
+    case writetoRF: //send apt data to panel 2
+      rf_comm();
       machine_state = readSwitches;
       break;
   }
-#endif
+  wdg_reset();
 }
