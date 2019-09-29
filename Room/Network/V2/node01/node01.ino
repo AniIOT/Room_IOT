@@ -15,13 +15,13 @@ void setup()
   gpio_init();
 
   //nrf-spi initialization
-  //  rf_init();
+  rf_init();
 
   //wifi-uart initialization
   uart_init();
 
   //watchdog initialization
-  //  wdg_init();
+  wdg_init();
 }
 
 void loop()
