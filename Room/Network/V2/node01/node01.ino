@@ -4,6 +4,7 @@
 #include "gpio.h"
 #include "uart.h"
 #include "wdg.h"
+#include "storage.h"
 
 boolean wifiBuffer[16] = {0};
 boolean switchBuffer[8] = {0};
@@ -28,6 +29,11 @@ void loop()
 {
   switch (machine_state)
   {
+    case readStorage:
+      getStored();
+      machine_state = readSwitches;
+    break;
+    
     case readSwitches:  //read current state of switches
       read_switches();
       machine_state = readWifiData;
@@ -47,6 +53,10 @@ void loop()
       rf_comm();
       machine_state = readSwitches;
       break;
+
+//    case writetoMem: //store current state in eeprom /*Note: Can be replaced by watchdog ISR*/
+//      storeCurrent();
+//      break;
   }
   wdg_reset();
 }

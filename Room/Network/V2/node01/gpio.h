@@ -4,7 +4,6 @@
 #define GPIOD_S1                 ((uint8_t)0x80)  //mux select line1 D7
 #define GPIOB_S2                 ((uint8_t)0x01)  //mux select line2 D8
 #define GPIOD_OP                 ((uint8_t)0x01)  //mux output line  D0
-
 #if testenable
 #define muxOPpin (PIND & 0x04) >> 2
 #else
@@ -41,5 +40,4 @@ extern boolean SwitchRead_Buffer[];
 /*function declarations*/
 void gpio_init();
 void read_switches();
-//void read_switches(boolean* switchBuffer);
 void write_Relays();
