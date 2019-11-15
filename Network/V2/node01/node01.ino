@@ -40,7 +40,7 @@ void loop()
       break;
 
     case readWifiData: //read and process data from mqtt broker
-      wifi_comm();
+//      wifi_comm();
       machine_state = writetoRelays;
       break;
 

@@ -3,7 +3,7 @@
 #include "Adafruit_MQTT_Client.h"
 
 /************************* WiFi Access Point *********************************/
-#define WLAN_SSID       "Private"
+#define WLAN_SSID       "Damle 3rd Floor"
 #define WLAN_PASS       "A342320D"
 
 /************************* Adafruit.io Setup *********************************/
@@ -47,6 +47,9 @@ void lightscallback(char *data, uint16_t len)
 
 void setup()
 {
+  
+  ESP.wdtDisable();
+  ESP.wdtEnable(0);
   Serial.begin(uartBaud);
 
   WiFi.begin(WLAN_SSID, WLAN_PASS);
@@ -63,7 +66,7 @@ void loop()
   mqtt.processPackets(10000);
   mqtt.ping();
   //call to watchdog reset
-  //reset_wdt();
+  ESP.wdtFeed(); 
 }
 
 void mqtt_connect()

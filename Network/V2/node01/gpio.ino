@@ -160,7 +160,6 @@ void write_Relays()
 {
   if (switchBuffer[0] xor wifiBuffer[0]) //yi
   {
-//    Serial.println("sw1");
     PORTD |=  GPIOD_R2;
   }
   else
@@ -182,9 +181,9 @@ void write_Relays()
     PORTC &= ~GPIOC_R5;
 
   if (switchBuffer[4] xor wifiBuffer[4]) //w4
-    PORTC |=  GPIOC_R7;
+    PORTC |=  GPIOC_R6;
   else
-    PORTC &= ~GPIOC_R7;
+    PORTC &= ~GPIOC_R6;
 
   if (switchBuffer[5] xor wifiBuffer[5]) //fan
     PORTD |=  GPIOD_R1;
@@ -196,8 +195,8 @@ void write_Relays()
   else
     PORTC &= ~GPIOC_R8;
 
-  if (switchBuffer[7] xor wifiBuffer[7]) //w4
-    PORTC |=  GPIOC_R6;
+  if (switchBuffer[7] xor wifiBuffer[7]) //e1
+    PORTC |=  GPIOC_R7;
   else
-    PORTC &= ~GPIOC_R6;
+    PORTC &= ~GPIOC_R7;
 }
