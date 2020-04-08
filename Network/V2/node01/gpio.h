@@ -1,11 +1,13 @@
 /*MACROS*/
+#define testenable 1
+
 /*switch pins*/
 #define GPIOD_S0                 ((uint8_t)0x40)  //mux select line0 D6
 #define GPIOD_S1                 ((uint8_t)0x80)  //mux select line1 D7
 #define GPIOB_S2                 ((uint8_t)0x01)  //mux select line2 D8
 #define GPIOD_OP                 ((uint8_t)0x01)  //mux output line  D0
 #if testenable
-#define muxOPpin (PIND & 0x04) >> 2
+#define muxOPpin (PIND & 0x08) >> 3
 #else
 #define muxOPpin (PIND & 0x01)
 #endif

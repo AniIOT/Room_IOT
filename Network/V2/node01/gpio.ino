@@ -141,7 +141,7 @@ void read_switches()
       flag = not flag;
       break;
   }
-//  printsBuffer();
+  printsBuffer();
 }
 
 void printsBuffer()
@@ -153,7 +153,7 @@ void printsBuffer()
   Serial.print(switchBuffer[4]);
   Serial.print(switchBuffer[5]);
   Serial.print(switchBuffer[6]);
-  Serial.print(switchBuffer[7]);
+  Serial.println(switchBuffer[7]);
 }
 
 void write_Relays()
