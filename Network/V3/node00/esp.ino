@@ -1,5 +1,4 @@
 
-
 boolean bcheckOKresp()
 {
   char* pRxBuffer = ESPRxBuffer;
@@ -80,12 +79,12 @@ teESPstatus ESPStateMachine()
 {
   static teESPstate eESPstate = eEspATReq;
   static boolean bRetry = true;
-  static teESPstatus teStatus = eEspInProgress;
+  static teESPstatus eESPStatus = eEspInProgress;
 
   switch (eESPstate)
   {
     case eEspATReq:
-      teStatus = eEspInProgress;
+      eESPStatus = eEspInProgress;
       hal_uart_tx((char*)("AT\r\n"), 4);
       eESPstate = eEspATResp;
       Serial.print("ESP-REQ-AT\r\n");
@@ -287,6 +286,7 @@ teESPstatus ESPStateMachine()
       if (handleRespose(&bRetry , eEspSendResp) == true)
       {
         eESPstate = eEspSuccessState;
+        ESPInitFlag = false;
         Serial.print("ESP-RESP-SEND\r\n");
       }
       else if (bRetry == true)
@@ -301,21 +301,22 @@ teESPstatus ESPStateMachine()
       break;
 
     case eEspexittransparentmode:
+      eESPStatus = eEspInProgress;
       hal_uart_tx((char*)("+++"), 3);
       eESPstate = eEspATReq;
       Serial.print("ESP-REQ-EXT\r\n");
       break;
 
     case eEspSuccessState:
-      teStatus = eEspSuccess;
+      eESPStatus = eEspSuccess;
       break;
 
     case eEspErrorState:
-      teStatus = eEspError;
+      eESPStatus = eEspError;
       break;
 
     default:
       break;
   }
-  return teStatus;
+  return eESPStatus;
 }

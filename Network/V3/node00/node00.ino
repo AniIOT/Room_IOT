@@ -1,17 +1,22 @@
-
 #include "node00.h"
-#include "hal_uart.h"
-#include "esp.h"
+#include "stdint.h"
 
 void setup()
 {
+  /*UART Init*/
   hal_uart_Init();
   delay(500);
+
+  /*ESP Init*/
+  while (ESPStateMachine() != eEspSuccess);
+
+//  /*MQTT_Init*/
+//  while (MQTTStateMachine() != eMQTTSuccess);
+connectToBroker();
+  
 }
 
 void loop()
 {
-  if (ESPStateMachine() == eEspSuccess)
-    Serial.print("SUCCESS\r\n");
-  delay(500);
+
 }
