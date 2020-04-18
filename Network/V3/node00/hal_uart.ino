@@ -7,12 +7,13 @@
 #define DEBUG_UART_BAUD                 9600
 
 /*Software UART pins - ESP8266 pins*/
-#define ESP_RX                 ((uint8_t)0x04)  //esp uart        D4
-#define ESP_TX                 ((uint8_t)0x05)  //esp uart        D5
+#define ESP_RX                          ((uint8_t)0x04)  //esp uart        D4
+#define ESP_TX                          ((uint8_t)0x05)  //esp uart        D5
 
-NeoSWSerial eSerial(ESP_RX, ESP_TX);
+NeoSWSerial eSerial(ESP_RX, ESP_TX);    //Software serial object
 
 static uint8_t rxBufferCount = 0;
+static uint8_t DataBufferCount = 0;
 
 void hal_uart_Init()
 {
@@ -23,21 +24,28 @@ void hal_uart_Init()
 
 static void eRxInterruptHandler(uint8_t rxChar)
 {
-//  if (ESPInitFlag)
-    if ((rxChar != '\n') and (rxBufferCount < ESPRxMaxBuffSize))
+  if ((rxChar != '\n') and (rxBufferCount < RxMaxBuffSize))
+  {
+    RxBuffer[rxBufferCount++] = (char)rxChar;
+    //        Serial.println(ESPRxBuffer[rxBufferCount - 1], HEX);
+    //    Serial.print(rxBufferCount);
+  }
+
+  if (ESPInitFlag && MQTTInitFlag)
+  {
+    if (RxBuffer[0] == (MQTT_CTRL_PUBLISH | MQTT_CTRL_PUBLISH_FLAG))
     {
-      ESPRxBuffer[rxBufferCount++] = (char)rxChar;
-          Serial.println(ESPRxBuffer[rxBufferCount-1],HEX);
-      //    Serial.print(rxBufferCount);
+//      DataBuffer[DataBufferCount++] = (char)rxChar;
     }
+  }
 }
 
 void clearRxBuffer()
 {
   rxBufferCount = 0;
-  for (uint8_t i = 0; i < ESPRxMaxBuffSize; i++)
+  for (uint8_t i = 0; i < RxMaxBuffSize; i++)
   {
-    ESPRxBuffer[i] = 0;
+    RxBuffer[i] = 0;
   }
 }
 

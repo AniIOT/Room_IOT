@@ -1,8 +1,8 @@
 
 boolean bcheckOKresp()
 {
-  char* pRxBuffer = ESPRxBuffer;
-  for (uint8_t i = 0; i < ESPRxMaxBuffSize; i++)
+  char* pRxBuffer = RxBuffer;
+  for (uint8_t i = 0; i < RxMaxBuffSize; i++)
   {
     if (*pRxBuffer == 'O' && *(++pRxBuffer) == 'K')
     {
@@ -16,8 +16,8 @@ boolean bcheckOKresp()
 
 boolean bcheckCONNECTresp()
 {
-  char* pRxBuffer = ESPRxBuffer;
-  for (uint8_t i = 0; i < ESPRxMaxBuffSize; i++)
+  char* pRxBuffer = RxBuffer;
+  for (uint8_t i = 0; i < RxMaxBuffSize; i++)
   {
     if (*pRxBuffer == 'C' && *(++pRxBuffer) == 'O' && *(++pRxBuffer) == 'N' && *(++pRxBuffer) == 'N' \
         && *(++pRxBuffer) == 'E' && *(++pRxBuffer) == 'C' && *(++pRxBuffer) == 'T')
@@ -32,10 +32,26 @@ boolean bcheckCONNECTresp()
 
 boolean bcheckSENDresp()
 {
-  char* pRxBuffer = ESPRxBuffer;
-  for (uint8_t i = 0; i < ESPRxMaxBuffSize; i++)
+  char* pRxBuffer = RxBuffer;
+  for (uint8_t i = 0; i < RxMaxBuffSize; i++)
   {
     if (*pRxBuffer == '>')
+    {
+      return true;
+    }
+    pRxBuffer++;
+  }
+  return false;
+
+}
+
+boolean bcheckEXTresp()
+{
+  char* pRxBuffer = RxBuffer;
+  for (uint8_t i = 0; i < RxMaxBuffSize; i++)
+  {
+    if (*pRxBuffer == 'C' && *(++pRxBuffer) == 'L' && *(++pRxBuffer) == 'O' && *(++pRxBuffer) == 'S' \
+        && *(++pRxBuffer) == 'E' && *(++pRxBuffer) == 'D')
     {
       return true;
     }
@@ -54,6 +70,8 @@ boolean handleRespose(boolean* pbRetry, teESPstate ehandleESPstate)
     checkFlag = bcheckCONNECTresp();
   else if (ehandleESPstate == eEspSendResp)
     checkFlag = bcheckSENDresp();
+  else if (ehandleESPstate == eEspexittransparentmodeResp)
+    checkFlag = bcheckEXTresp();
   else
     checkFlag = bcheckOKresp();
   if (checkFlag == true)
@@ -77,7 +95,7 @@ boolean handleRespose(boolean* pbRetry, teESPstate ehandleESPstate)
 
 teESPstatus ESPStateMachine()
 {
-  static teESPstate eESPstate = eEspATReq;
+  static teESPstate eESPstate = eEspexittransparentmodeReq;
   static boolean bRetry = true;
   static teESPstatus eESPStatus = eEspInProgress;
 
@@ -234,7 +252,7 @@ teESPstatus ESPStateMachine()
       break;
 
     case eEspSetupTCPResp:
-      delay(100);
+      delay(500);
       if (handleRespose(&bRetry , eEspSetupTCPResp) == true)
       {
         eESPstate = eEspTransparentModeOnReq;
@@ -270,7 +288,7 @@ teESPstatus ESPStateMachine()
       }
       else
       {
-        eESPstate = eEspATReq;
+        eESPstate = eEspexittransparentmodeReq;
         Serial.print("Check connection with ESP\r\n"); //print error if even after set number of retries ESP doesn't respond
       }
       break;
@@ -286,7 +304,7 @@ teESPstatus ESPStateMachine()
       if (handleRespose(&bRetry , eEspSendResp) == true)
       {
         eESPstate = eEspSuccessState;
-        ESPInitFlag = false;
+        ESPInitFlag = true;
         Serial.print("ESP-RESP-SEND\r\n");
       }
       else if (bRetry == true)
@@ -295,16 +313,34 @@ teESPstatus ESPStateMachine()
       }
       else
       {
-        eESPstate = eEspATReq;
+        eESPstate = eEspexittransparentmodeReq;
         Serial.print("Check connection with ESP\r\n"); //print error if even after set number of retries ESP doesn't respond
       }
       break;
 
-    case eEspexittransparentmode:
+    case eEspexittransparentmodeReq:
       eESPStatus = eEspInProgress;
+      eESPstate = eEspexittransparentmodeResp;
       hal_uart_tx((char*)("+++"), 3);
-      eESPstate = eEspATReq;
       Serial.print("ESP-REQ-EXT\r\n");
+      break;
+
+    case eEspexittransparentmodeResp:
+      delay(500);
+      if (handleRespose(&bRetry , eEspexittransparentmodeResp) == true)
+      {
+        eESPstate = eEspATReq;
+        Serial.print("ESP-RESP-EXT\r\n");
+      }
+      else if (bRetry == true)
+      {
+        eESPstate = eEspexittransparentmodeReq;
+      }
+      else
+      {
+        eESPstate = eEspATReq;
+//        Serial.print("Check connection with ESP\r\n"); //print error if even after set number of retries ESP doesn't respond
+      }
       break;
 
     case eEspSuccessState:
