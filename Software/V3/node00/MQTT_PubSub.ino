@@ -62,10 +62,10 @@ boolean handleMQTTresponse(boolean* pbRetry, teMQTTState eState)
   return false;
 }
 
-void connectToBroker()
+void connectToBroker(uint8_t u8connectFlags, unsigned char* ucClientID, unsigned char* ucUsername, unsigned char* ucPassword, uint16_t u16KeepAliveTimeS)
 {
-  char connectBuff[100] = {0};
-  char* ptrconnectBuff = connectBuff;
+  volatile unsigned char connectBuff[100] = {0}; //TODO: decide buffer length as username and password can vary and can be very long
+  unsigned char* ptrconnectBuff = connectBuff;
   uint16_t stringLen = 0;
   uint8_t charCounter = 0;
 
@@ -82,69 +82,64 @@ void connectToBroker()
   *ptrconnectBuff++ = 'M';
   *ptrconnectBuff++ = 'Q';
   *ptrconnectBuff++ = 'T';
-  *ptrconnectBuff++ = 'T';
+  *ptrconnectBuff++ = 'T'; //This will stay same unless protocol level changes, can be also made generic by having protocol level and name as parameters
   charCounter += 6;
-
   //Protocol Level
   *ptrconnectBuff++ = MQTT_PROTOCOL_LEVEL;
   charCounter++;
   //Connect Flags
-  *ptrconnectBuff++ = 0xC2; //Username Flag | Password Flag | Will Retain | Will QoS | Will Flag | Clean Session | Reserved
+  *ptrconnectBuff++ = (unsigned char)u8connectFlags;//Username Flag | Password Flag | Will Retain | Will QoS | Will Flag | Clean Session | Reserved
   charCounter++;
   //Keep alive time
-  *ptrconnectBuff++ = (char)(0xFF00 & MQTT_CONN_KEEPALIVE);
-  *ptrconnectBuff++ = (char)(0x00FF & MQTT_CONN_KEEPALIVE);
+  *ptrconnectBuff++ = (unsigned char)(0xFF00 & u16KeepAliveTimeS);
+  *ptrconnectBuff++ = (unsigned char)(0x00FF & u16KeepAliveTimeS);
   charCounter += 2;
 
   /*Payload*/
   //CID length
-  *ptrconnectBuff++ = 0x00;
-  *ptrconnectBuff++ = 0x06;
+  stringLen = (uint16_t)strlen(ucClientID);
+  *ptrconnectBuff++ = (stringLen & 0xFF00);
+  *ptrconnectBuff++ = (stringLen & 0x00FF);
   charCounter += 2;
-
-  //CID
-  *ptrconnectBuff++ = 'A';
-  *ptrconnectBuff++ = 'B';
-  *ptrconnectBuff++ = 'C';
-  *ptrconnectBuff++ = 'D';
-  *ptrconnectBuff++ = 'E';
-  *ptrconnectBuff++ = 'F';
-  charCounter += 6;
-
+  if (stringLen > 0)
+  {
+    //CID
+    for (uint8_t i = 0; i < (uint8_t)stringLen; i++)
+      *ptrconnectBuff++ = *ucClientID++;
+    charCounter += stringLen;
+  }
   //UID length
-  stringLen = (uint16_t)strlen(MQTT_USERNAME);
+  stringLen = (uint16_t)strlen(ucUsername);
   *ptrconnectBuff++ = (char)(0xFF00 & stringLen);
   *ptrconnectBuff++ = (char)(0x00FF & stringLen);
   charCounter += 2;
-
   //UID
-  memcpy(ptrconnectBuff, MQTT_USERNAME, sizeof(MQTT_USERNAME));
-  ptrconnectBuff += stringLen;
+  for (uint8_t i = 0; i < (uint8_t)stringLen; i++)
+    *ptrconnectBuff++ = *ucUsername++;
   charCounter += stringLen;
-
   //Password length
-  stringLen = (uint16_t)strlen(MQTT_PASSWORD);
+  stringLen = (uint16_t)strlen(ucPassword);
   *ptrconnectBuff++ = (char)(0xFF00 & stringLen);
   *ptrconnectBuff++ = (char)(0x00FF & stringLen);
   charCounter += 2;
-
   //Password
-  memcpy(ptrconnectBuff, MQTT_PASSWORD, sizeof(MQTT_PASSWORD));
+  for (uint8_t i = 0; i < (uint8_t)stringLen; i++)
+    *ptrconnectBuff++ = *ucPassword++;
   charCounter += stringLen;
 
   /*Add Remaining Length*/
   connectBuff[1] = charCounter - 2;
 
+  /*Send data through uart to server*/
   hal_uart_tx(connectBuff, charCounter);
-  //
-  //  for (int i = 0; i < 62; i++)
+
+  //  for (int i = 0; i < charCounter; i++)
   //    Serial.println(connectBuff[i], HEX);
 }
 
-void subscribeToTopic(char * ptrTopic)
+void subscribeToTopic(char * ptrTopic, uint8_t uiQoS)
 {
-  volatile unsigned char subscribeBuff[20];
-  memset(subscribeBuff, 0, 20 * sizeof(unsigned char));
+  volatile unsigned char subscribeBuff[20]; //TODO: check if this length is enough by considering a long topic name
   unsigned char* ptrsubscribeBuff = subscribeBuff;
   uint16_t stringLen = 0;
   uint8_t charCounter = 0;
@@ -163,24 +158,23 @@ void subscribeToTopic(char * ptrTopic)
 
   /*Payload*/
   //Topic length
-  stringLen = (uint16_t)strlen(MQTT_TOPIC);
+  stringLen = (uint16_t)strlen(ptrTopic);
   *ptrsubscribeBuff++ = (char)(0xFF00 & stringLen);
   *ptrsubscribeBuff++ = (char)(0x00FF & stringLen);
   charCounter += 2;
-
   //Topic
   for (uint8_t i = 0; i < stringLen; i++)
     *ptrsubscribeBuff++ = *ptrTopic++;
   charCounter += stringLen;
-
   //QoS
-  *ptrsubscribeBuff = MQTT_QOS_0;
+  *ptrsubscribeBuff = uiQoS;
   charCounter ++
   ;
 
-  //Add remaining length
+  /*Add remaining length*/
   subscribeBuff[1] = charCounter - 2;
 
+  /*Send data through uart to server*/
   hal_uart_tx(subscribeBuff, charCounter);
 
   //  for (int i = 0; i < charCounter; i++)
@@ -190,7 +184,6 @@ void subscribeToTopic(char * ptrTopic)
 void publishToTopic(char * ptrTopic, char* ptrData)
 {
   volatile unsigned char publishBuff[30];
-  memset(publishBuff, 0, 30 * sizeof(unsigned char));
   unsigned char* ptrpublishBuff = publishBuff;
   uint16_t stringLen = 0;
   uint8_t charCounter = 0;
@@ -207,12 +200,10 @@ void publishToTopic(char * ptrTopic, char* ptrData)
   *ptrpublishBuff++ = (char)(0xFF00 & stringLen);
   *ptrpublishBuff++ = (char)(0x00FF & stringLen);
   charCounter += 2;
-
   //Topic
   for (uint8_t i = 0; i < stringLen; i++)
     *ptrpublishBuff++ = *ptrTopic++;
   charCounter += stringLen;
-
   //Packet ID
   *ptrpublishBuff++ = 0x00;
   *ptrpublishBuff++ = 0x01;
@@ -221,9 +212,10 @@ void publishToTopic(char * ptrTopic, char* ptrData)
   /*Payload*/
   //Data
 
-  //Add remaining length
+  /*Add remaining length*/
   publishBuff[1] = charCounter - 2;
 
+  /*Send data through uart to server*/
   hal_uart_tx(publishBuff, charCounter);
 
   //  for (int i = 0; i < charCounter; i++)
@@ -232,7 +224,7 @@ void publishToTopic(char * ptrTopic, char* ptrData)
 
 void pingToServer()
 {
-  char pingBuff[2] = {0, 0};
+  volatile char pingBuff[2] = {0, 0};
   char* ptrpingBuff = pingBuff;
 
   *ptrpingBuff++ = ( MQTT_CTRL_PINGREQ | MQTT_CTRL_PINGREQ_FLAG );
@@ -256,7 +248,7 @@ teMQTTstatus MQTTStateMachine()
       break;
 
     case eMQTTConnectReq:
-      connectToBroker();
+      connectToBroker((MQTT_CONN_USERNAMEFLAG | MQTT_CONN_PASSWORDFLAG | MQTT_CONN_CLEANSESSION), "", MQTT_USERNAME, MQTT_PASSWORD, MQTT_CONN_KEEPALIVE);
       eMQTTstate = eMQTTConnectACK;
       Serial.println("Connecting to AdafruitIO MQTT Broker");
       break;
@@ -281,7 +273,7 @@ teMQTTstatus MQTTStateMachine()
       break;
 
     case eMQTTSubscribeReq:
-      subscribeToTopic((char*)MQTT_TOPIC);
+      subscribeToTopic((char*)MQTT_TOPIC, MQTT_QOS_0);
       eMQTTstate = eMQTTSubscribeACK;
       Serial.println("Subscribing to topic ""\""MQTT_TOPIC"\"");
       break;

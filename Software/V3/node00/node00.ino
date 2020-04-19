@@ -8,7 +8,7 @@ void setup()
   delay(500);
 
   /*MQTT_Init*/
-  while (MQTTStateMachine() != eMQTTSuccess);
+  while (MQTTStateMachine() != eMQTTSuccess); //TODO: add assert param function to all functions for all function parameters
 }
 
 void loop()

@@ -39,9 +39,9 @@
 
 #define MQTT_CONN_KEEPALIVE               (uint16_t)60 //no. of seconds for which connection is to be kept alive 
 
-#define MQTT_QOS_2                        0x2 //Quality of service level 2
-#define MQTT_QOS_1                        0x1 //Quality of service level 1
-#define MQTT_QOS_0                        0x0 //Quality of service level 0
+#define MQTT_QOS_2                        (uint8_t)0x2 //Quality of service level 2
+#define MQTT_QOS_1                        (uint8_t)0x1 //Quality of service level 1
+#define MQTT_QOS_0                        (uint8_t)0x0 //Quality of service level 0
 #define MQTT_RETAIN                       0x1 //Packet to be retained by server
 #define MQTT_NO_RETAIN                    0x0 //Packet to be discarded after processing
 
@@ -126,7 +126,7 @@ void hal_uart_Init();
 boolean hal_uart_tx(char* pTxBuff, uint8_t utxCount);
 teMQTTstatus MQTTStateMachine();
 teESPstatus ESPStateMachine();
-void connectToBroker();
-void subscribeToTopic(char * ptrTopic);
+void connectToBroker(uint8_t u8connectFlags, unsigned char* ucClientID, unsigned char* ucUsername, unsigned char* ucPassword, uint16_t u16KeepAliveTimeS);
+void subscribeToTopic(char * ptrTopic, uint8_t uiQoS);
 void publishToTopic(char * ptrTopic, char* ptrData);
 void pingToServer();
