@@ -1,0 +1,2 @@
+void getStored();
+void storeCurrent();
