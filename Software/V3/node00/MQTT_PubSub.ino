@@ -174,10 +174,10 @@ void subscribeToTopic(char* ptrTopic, uint8_t uiQoS)
   subscribeBuff[1] = charCounter - 2;
 
   /*Send data through uart to server*/
-    hal_uart_tx(subscribeBuff, charCounter);
+  hal_uart_tx(subscribeBuff, charCounter);
 
-//  for (int i = 0; i < charCounter; i++)
-//    Serial.println(subscribeBuff[i], HEX);
+  //  for (int i = 0; i < charCounter; i++)
+  //    Serial.println(subscribeBuff[i], HEX);
 }
 
 void publishToTopic(char * ptrTopic, char* ptrData, uint8_t uiQoS, uint8_t u8RetainFlag)
@@ -261,7 +261,7 @@ teMQTTstatus MQTTStateMachine()
       if (handleMQTTresponse(&bRetry, eMQTTConnectACK) == true)
       {
         eMQTTstate = eMQTTSubscribeReq;
-        Serial.println("Connection to AdafruitIO MQTT Broker Successful");
+        Serial.println("Connection Successful");
       }
       else if (bRetry == true)
       {
@@ -310,7 +310,7 @@ teMQTTstatus MQTTStateMachine()
       break;
 
     case eMQTTSubscribeACK:
-      delay(2000);
+      delay(4000);
       if (handleMQTTresponse(&bRetry, eMQTTSubscribeACK) == true)
       {
         eMQTTstate = eMQTTSuccessState;
@@ -330,7 +330,7 @@ teMQTTstatus MQTTStateMachine()
       break;
 
     case eMQTTPublishReq:
-//      publishToTopic(MQTT_TOPIC, "111", MQTT_QOS_0, MQTT_RETAIN);
+      //      publishToTopic(MQTT_TOPIC, "111", MQTT_QOS_0, MQTT_RETAIN);
       eMQTTstate = eMQTTPublishACK;
       break;
 

@@ -1,8 +1,8 @@
 
-/*Global Declarationns*/
+/*Global Declarations*/
 
 /*Macro Declarations*/
-#define RxMaxBuffSize                     (uint8_t)500
+#define RxMaxBuffSize                     (uint8_t)200
 #define RxDataMaxBuffSize                 (uint8_t)10
 
 #define MQTT_CTRL_CONNECT                 0x10
@@ -47,10 +47,10 @@
 
 #define MQTT_CONN_USERNAMEFLAG            0x80 //If username is present
 #define MQTT_CONN_PASSWORDFLAG            0x40 //If password is present (applicable only is username flag is high)
-#define MQTT_CONN_WILLRETAIN              0x20
-#define MQTT_CONN_WILLQOS_1               0x08
-#define MQTT_CONN_WILLQOS_2               0x18
-#define MQTT_CONN_WILLFLAG                0x04
+#define MQTT_CONN_WILLRETAIN              0x20 //Sates if the will message is to be retained by server after disconnect
+#define MQTT_CONN_WILLQOS_1               0x08 //Will message QoS
+#define MQTT_CONN_WILLQOS_2               0x18 //Will message QoS
+#define MQTT_CONN_WILLFLAG                0x04 //States if a will message is present
 #define MQTT_CONN_CLEANSESSION            0x02 //Start with a clean session
 
 #define MQTT_PROTOCOL_LEVEL               0x04 //Protocol level 4 as per MQTT 3.1.1
@@ -74,8 +74,28 @@
 #define MQTT_TOPIC14                       "AniIOT/feeds/toil.l2"
 #define MQTT_TOPIC15                       "AniIOT/feeds/toil.l3"
 
+
+
+typedef enum
+{
+  Fan,
+  Yellow1,
+  Yellow2,
+  White1,
+  White2,
+  White3,
+  White4,
+  Passage,
+  Loft,
+  Exaust,
+  ToiletWhite,
+  ToiletYellow,
+  WaterHeater,
+  MaxSwitches,
+} teSwitchCategory;
+
 /*Variable Declarations*/
-typedef enum 
+typedef enum
 {
   eEspATReq,
   eEspATResp,
@@ -99,14 +119,14 @@ typedef enum
   eEspexittransparentmodeResp,
   eEspSuccessState,
   eEspErrorState,
-}teESPstate;
+} teESPstate;
 
 typedef enum
 {
   eEspError,
   eEspInProgress,
   eEspSuccess,
-}teESPstatus;
+} teESPstatus;
 
 typedef enum
 {
@@ -119,19 +139,20 @@ typedef enum
   eMQTTPublishACK,
   eMQTTSuccessState,
   eMQTTErrorState,
-}teMQTTState;
+} teMQTTState;
 
-typedef enum 
+typedef enum
 {
   eMQTTError,
   eMQTTInProgress,
   eMQTTSuccess,
-}teMQTTstatus;
+} teMQTTstatus;
 
-static unsigned char RxBuffer[RxMaxBuffSize] = {0};
-static uint16_t SubPacketID = 0x0001;
-static uint16_t PubPacketID = 0x0001;
-static uint8_t rxBufferCount = 0;
+unsigned char RxBuffer[RxMaxBuffSize] = {0};
+boolean MQTTSwitchBuffer[MaxSwitches] = {0};
+uint16_t SubPacketID = 0x0001;
+uint16_t PubPacketID = 0x0001;
+uint8_t rxBufferCount = 0;
 boolean ESPInitFlag = false;
 boolean MQTTInitFlag = false;
 
@@ -141,6 +162,6 @@ boolean hal_uart_tx(char* pTxBuff, uint8_t utxCount);
 teMQTTstatus MQTTStateMachine();
 teESPstatus ESPStateMachine();
 void connectToBroker(uint8_t u8connectFlags, unsigned char* ucClientID, unsigned char* ucUsername, unsigned char* ucPassword, uint16_t u16KeepAliveTimeS);
-void subscribeToTopic(char * ptrTopic,char * ptrTopic2, uint8_t uiQoS);
+void subscribeToTopic(char * ptrTopic, char * ptrTopic2, uint8_t uiQoS);
 void publishToTopic(char * ptrTopic, char* ptrData, uint8_t uiQoS, uint8_t u8RetainFlag);
 void pingToServer();
