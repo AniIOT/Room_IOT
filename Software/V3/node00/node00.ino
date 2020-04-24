@@ -1,6 +1,9 @@
 #include "node00.h"
 #include "stdint.h"
 
+static unsigned long prevMillis  = 0;
+static unsigned long currMillis  = 0;
+
 void setup()
 {
   /*UART Init*/
@@ -8,11 +11,20 @@ void setup()
   delay(500);
 
   /*MQTT_Init*/
-  while (MQTTStateMachine() != eMQTTSuccess); //TODO: add assert param function to all functions for all function parameters
+  while (MQTTStateMachine() != eMQTTSuccess);
+  
+  currMillis = millis();
+  prevMillis = currMillis;
+  rxBufferCount = 0;
 }
 
 void loop()
 {
-  pingToServer();
-  delay(700);
+  currMillis = millis();
+  if (currMillis - prevMillis >= 1000)
+  {
+//    Serial.println("pinging");
+    pingToServer();
+    prevMillis = currMillis;
+  }
 }

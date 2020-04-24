@@ -304,7 +304,6 @@ teESPstatus ESPStateMachine()
       if (handleRespose(&bRetry , eEspSendResp) == true)
       {
         eESPstate = eEspSuccessState;
-        ESPInitFlag = true;
         Serial.print("ESP-RESP-SEND\r\n");
       }
       else if (bRetry == true)
@@ -339,11 +338,12 @@ teESPstatus ESPStateMachine()
       else
       {
         eESPstate = eEspATReq;
-//        Serial.print("Check connection with ESP\r\n"); //print error if even after set number of retries ESP doesn't respond
+        //        Serial.print("Check connection with ESP\r\n"); //print error if even after set number of retries ESP doesn't respond
       }
       break;
 
     case eEspSuccessState:
+      ESPInitFlag = true;
       eESPStatus = eEspSuccess;
       break;
 

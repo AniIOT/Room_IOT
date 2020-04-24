@@ -2,8 +2,8 @@
 /*Global Declarationns*/
 
 /*Macro Declarations*/
-#define RxMaxBuffSize                     (uint8_t)200
-#define RxDataMaxBuffSize                 (uint8_t)5
+#define RxMaxBuffSize                     (uint8_t)500
+#define RxDataMaxBuffSize                 (uint8_t)10
 
 #define MQTT_CTRL_CONNECT                 0x10
 #define MQTT_CTRL_CONNECTACK              0x20
@@ -37,7 +37,7 @@
 
 #define MQTT_POS_ACK                      0x0
 
-#define MQTT_CONN_KEEPALIVE               (uint16_t)60 //no. of seconds for which connection is to be kept alive 
+#define MQTT_CONN_KEEPALIVE               (uint16_t)10 //no. of seconds for which connection is to be kept alive 
 
 #define MQTT_QOS_2                        (uint8_t)0x2 //Quality of service level 2
 #define MQTT_QOS_1                        (uint8_t)0x1 //Quality of service level 1
@@ -57,7 +57,22 @@
 
 #define MQTT_USERNAME                     "AniIOT"
 #define MQTT_PASSWORD                     "1d2f2a184b57420e9f95b216d614a181" //AIO key
-#define MQTT_TOPIC                        "AniIOT/feeds/LightD"
+
+#define MQTT_TOPIC1                        "AniIOT/feeds/MOOD"
+#define MQTT_TOPIC2                        "AniIOT/feeds/main.f1"
+#define MQTT_TOPIC3                        "AniIOT/feeds/main.l1"
+#define MQTT_TOPIC4                        "AniIOT/feeds/main.l2"
+#define MQTT_TOPIC5                        "AniIOT/feeds/main.l3"
+#define MQTT_TOPIC6                        "AniIOT/feeds/main.l4"
+#define MQTT_TOPIC7                        "AniIOT/feeds/main.l5"
+#define MQTT_TOPIC8                        "AniIOT/feeds/main.l6"
+#define MQTT_TOPIC9                        "AniIOT/feeds/main.ac"
+#define MQTT_TOPIC10                       "AniIOT/feeds/pass.l1"
+#define MQTT_TOPIC11                       "AniIOT/feeds/pass.l2"
+#define MQTT_TOPIC12                       "AniIOT/feeds/toil.f1"
+#define MQTT_TOPIC13                       "AniIOT/feeds/toil.l1"
+#define MQTT_TOPIC14                       "AniIOT/feeds/toil.l2"
+#define MQTT_TOPIC15                       "AniIOT/feeds/toil.l3"
 
 /*Variable Declarations*/
 typedef enum 
@@ -114,10 +129,9 @@ typedef enum
 }teMQTTstatus;
 
 static unsigned char RxBuffer[RxMaxBuffSize] = {0};
-static unsigned char DataBuffer[RxDataMaxBuffSize] = {0};
-static uint16_t packetID = 0x0001;
+static uint16_t SubPacketID = 0x0001;
+static uint16_t PubPacketID = 0x0001;
 static uint8_t rxBufferCount = 0;
-static uint8_t DataBufferCount = 0;
 boolean ESPInitFlag = false;
 boolean MQTTInitFlag = false;
 
@@ -127,6 +141,6 @@ boolean hal_uart_tx(char* pTxBuff, uint8_t utxCount);
 teMQTTstatus MQTTStateMachine();
 teESPstatus ESPStateMachine();
 void connectToBroker(uint8_t u8connectFlags, unsigned char* ucClientID, unsigned char* ucUsername, unsigned char* ucPassword, uint16_t u16KeepAliveTimeS);
-void subscribeToTopic(char * ptrTopic, uint8_t uiQoS);
-void publishToTopic(char * ptrTopic, char* ptrData);
+void subscribeToTopic(char * ptrTopic,char * ptrTopic2, uint8_t uiQoS);
+void publishToTopic(char * ptrTopic, char* ptrData, uint8_t uiQoS, uint8_t u8RetainFlag);
 void pingToServer();

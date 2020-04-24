@@ -18,12 +18,12 @@ boolean bcheckSubscribeAck()
   unsigned char* pRxBuffer = RxBuffer;
   for (uint8_t i = 0; i < RxMaxBuffSize; i++)
   {
-    if (*pRxBuffer == MQTT_CTRL_SUBACK && *(++pRxBuffer) == (rxBufferCount - 2) && *(++pRxBuffer) == (packetID & 0xFF00) && *(++pRxBuffer) == (packetID & 0x00FF) && *(++pRxBuffer) == MQTT_POS_ACK)
+    if (*pRxBuffer == MQTT_CTRL_SUBACK && *(++pRxBuffer) == (rxBufferCount - 2) && *(++pRxBuffer) == (SubPacketID & 0xFF00) && *(++pRxBuffer) == (SubPacketID & 0x00FF) && *(++pRxBuffer) == MQTT_POS_ACK)
     {
-      if (packetID == 0xFFFF)
-        packetID = 0;
+      if (SubPacketID == 0xFFFF)
+        SubPacketID = 0;
       else
-        packetID++;
+        SubPacketID++;
       return true;
     }
     pRxBuffer++;
@@ -64,7 +64,7 @@ boolean handleMQTTresponse(boolean* pbRetry, teMQTTState eState)
 
 void connectToBroker(uint8_t u8connectFlags, unsigned char* ucClientID, unsigned char* ucUsername, unsigned char* ucPassword, uint16_t u16KeepAliveTimeS)
 {
-  volatile unsigned char connectBuff[100] = {0}; //TODO: decide buffer length as username and password can vary and can be very long
+  unsigned char connectBuff[100] = {0}; //TODO: decide buffer length as username and password can vary and can be very long
   unsigned char* ptrconnectBuff = connectBuff;
   uint16_t stringLen = 0;
   uint8_t charCounter = 0;
@@ -137,9 +137,9 @@ void connectToBroker(uint8_t u8connectFlags, unsigned char* ucClientID, unsigned
   //    Serial.println(connectBuff[i], HEX);
 }
 
-void subscribeToTopic(char * ptrTopic, uint8_t uiQoS)
+void subscribeToTopic(char* ptrTopic, uint8_t uiQoS)
 {
-  volatile unsigned char subscribeBuff[20]; //TODO: check if this length is enough by considering a long topic name
+  unsigned char subscribeBuff[200]; //TODO: check if this length is enough by considering a long topic name
   unsigned char* ptrsubscribeBuff = subscribeBuff;
   uint16_t stringLen = 0;
   uint8_t charCounter = 0;
@@ -152,8 +152,8 @@ void subscribeToTopic(char * ptrTopic, uint8_t uiQoS)
 
   /*Variable Header*/
   //Packet ID
-  *ptrsubscribeBuff++ = (packetID & 0xFF00);
-  *ptrsubscribeBuff++ = (packetID & 0x00FF);
+  *ptrsubscribeBuff++ = (SubPacketID & 0xFF00);
+  *ptrsubscribeBuff++ = (SubPacketID & 0x00FF);
   charCounter += 2;
 
   /*Payload*/
@@ -167,36 +167,35 @@ void subscribeToTopic(char * ptrTopic, uint8_t uiQoS)
     *ptrsubscribeBuff++ = *ptrTopic++;
   charCounter += stringLen;
   //QoS
-  *ptrsubscribeBuff = uiQoS;
-  charCounter ++
-  ;
+  *ptrsubscribeBuff++ = uiQoS;
+  charCounter++;
 
   /*Add remaining length*/
   subscribeBuff[1] = charCounter - 2;
 
   /*Send data through uart to server*/
-  hal_uart_tx(subscribeBuff, charCounter);
+    hal_uart_tx(subscribeBuff, charCounter);
 
-  //  for (int i = 0; i < charCounter; i++)
-  //    Serial.println(subscribeBuff[i], HEX);
+//  for (int i = 0; i < charCounter; i++)
+//    Serial.println(subscribeBuff[i], HEX);
 }
 
-void publishToTopic(char * ptrTopic, char* ptrData)
+void publishToTopic(char * ptrTopic, char* ptrData, uint8_t uiQoS, uint8_t u8RetainFlag)
 {
-  volatile unsigned char publishBuff[30];
+  unsigned char publishBuff[30];
   unsigned char* ptrpublishBuff = publishBuff;
   uint16_t stringLen = 0;
   uint8_t charCounter = 0;
 
   /*Fixed header*/
-  *ptrpublishBuff++ = ( MQTT_CTRL_PUBLISH | MQTT_CTRL_PUBLISH_FLAG | MQTT_RETAIN);
+  *ptrpublishBuff++ = ( MQTT_CTRL_PUBLISH | MQTT_CTRL_PUBLISH_FLAG | u8RetainFlag | (uiQoS < 1));
   charCounter++;
   ptrpublishBuff++;
   charCounter++;
 
   /*Variable Header*/
   //Topic length
-  stringLen = (uint16_t)strlen(MQTT_TOPIC);
+  stringLen = (uint16_t)strlen(ptrTopic);
   *ptrpublishBuff++ = (char)(0xFF00 & stringLen);
   *ptrpublishBuff++ = (char)(0x00FF & stringLen);
   charCounter += 2;
@@ -205,12 +204,16 @@ void publishToTopic(char * ptrTopic, char* ptrData)
     *ptrpublishBuff++ = *ptrTopic++;
   charCounter += stringLen;
   //Packet ID
-  *ptrpublishBuff++ = 0x00;
-  *ptrpublishBuff++ = 0x01;
+  *ptrpublishBuff++ = (PubPacketID & 0xFF00);
+  *ptrpublishBuff++ = (PubPacketID & 0x00FF);
   charCounter += 2;
 
   /*Payload*/
   //Data
+  stringLen = (uint16_t)strlen(ptrData);
+  for (uint8_t i = 0; i < stringLen; i++)
+    *ptrpublishBuff++ = *ptrData++;
+  charCounter += stringLen;
 
   /*Add remaining length*/
   publishBuff[1] = charCounter - 2;
@@ -218,19 +221,19 @@ void publishToTopic(char * ptrTopic, char* ptrData)
   /*Send data through uart to server*/
   hal_uart_tx(publishBuff, charCounter);
 
-  //  for (int i = 0; i < charCounter; i++)
-  //    Serial.println(subscribeBuff[i], HEX);
+  //    for (int i = 0; i < charCounter; i++)
+  //      Serial.println(publishBuff[i], HEX);
 }
 
 void pingToServer()
 {
-  volatile char pingBuff[2] = {0, 0};
+  char pingBuff[2] = {0, 0};
   char* ptrpingBuff = pingBuff;
 
   *ptrpingBuff++ = ( MQTT_CTRL_PINGREQ | MQTT_CTRL_PINGREQ_FLAG );
   *ptrpingBuff = 0x00;                                              //Remaining length is zero
 
-  Serial.println(".");
+  //  Serial.println(".");
   hal_uart_tx(pingBuff, 2);
 }
 
@@ -248,7 +251,7 @@ teMQTTstatus MQTTStateMachine()
       break;
 
     case eMQTTConnectReq:
-      connectToBroker((MQTT_CONN_USERNAMEFLAG | MQTT_CONN_PASSWORDFLAG | MQTT_CONN_CLEANSESSION), "", MQTT_USERNAME, MQTT_PASSWORD, MQTT_CONN_KEEPALIVE);
+      connectToBroker((MQTT_CONN_USERNAMEFLAG | MQTT_CONN_PASSWORDFLAG | MQTT_CONN_CLEANSESSION), "Aniruddha", MQTT_USERNAME, MQTT_PASSWORD, MQTT_CONN_KEEPALIVE);
       eMQTTstate = eMQTTConnectACK;
       Serial.println("Connecting to AdafruitIO MQTT Broker");
       break;
@@ -273,17 +276,45 @@ teMQTTstatus MQTTStateMachine()
       break;
 
     case eMQTTSubscribeReq:
-      subscribeToTopic((char*)MQTT_TOPIC, MQTT_QOS_0);
+      Serial.println("Subscribing to topics");
+      subscribeToTopic((char*)MQTT_TOPIC1, MQTT_QOS_0);
+      delay(500);
+      subscribeToTopic((char*)MQTT_TOPIC2, MQTT_QOS_0);
+      delay(500);
+      subscribeToTopic((char*)MQTT_TOPIC3, MQTT_QOS_0);
+      delay(500);
+      subscribeToTopic((char*)MQTT_TOPIC4, MQTT_QOS_0);
+      delay(500);
+      subscribeToTopic((char*)MQTT_TOPIC5, MQTT_QOS_0);
+      delay(500);
+      subscribeToTopic((char*)MQTT_TOPIC6, MQTT_QOS_0);
+      delay(500);
+      subscribeToTopic((char*)MQTT_TOPIC7, MQTT_QOS_0);
+      delay(500);
+      subscribeToTopic((char*)MQTT_TOPIC8, MQTT_QOS_0);
+      delay(500);
+      subscribeToTopic((char*)MQTT_TOPIC9, MQTT_QOS_0);
+      delay(500);
+      subscribeToTopic((char*)MQTT_TOPIC10, MQTT_QOS_0);
+      delay(500);
+      subscribeToTopic((char*)MQTT_TOPIC11, MQTT_QOS_0);
+      delay(500);
+      subscribeToTopic((char*)MQTT_TOPIC12, MQTT_QOS_0);
+      delay(500);
+      subscribeToTopic((char*)MQTT_TOPIC13, MQTT_QOS_0);
+      delay(500);
+      subscribeToTopic((char*)MQTT_TOPIC14, MQTT_QOS_0);
+      delay(500);
+      subscribeToTopic((char*)MQTT_TOPIC15, MQTT_QOS_0);
       eMQTTstate = eMQTTSubscribeACK;
-      Serial.println("Subscribing to topic ""\""MQTT_TOPIC"\"");
       break;
 
     case eMQTTSubscribeACK:
-      delay(1000);
+      delay(2000);
       if (handleMQTTresponse(&bRetry, eMQTTSubscribeACK) == true)
       {
         eMQTTstate = eMQTTSuccessState;
-        Serial.println("Subscription to "MQTT_TOPIC" was successful");
+        Serial.println("Subscription to all topics was successful");
       }
       else if (bRetry == true)
       {
@@ -299,12 +330,15 @@ teMQTTstatus MQTTStateMachine()
       break;
 
     case eMQTTPublishReq:
+//      publishToTopic(MQTT_TOPIC, "111", MQTT_QOS_0, MQTT_RETAIN);
+      eMQTTstate = eMQTTPublishACK;
       break;
 
     case eMQTTPublishACK:
       break;
 
     case eMQTTSuccessState:
+      MQTTInitFlag = true;
       eMQTTStatus = eMQTTSuccess;
       break;
 
