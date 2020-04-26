@@ -150,6 +150,9 @@ typedef enum
   eMQTTSuccess,
 } teMQTTstatus;
 
+static unsigned long prevMillis100mstask = 0;     //Switches debouncing
+static unsigned long prevMillis10000mstask = 0;   //Ping to server
+static unsigned long currMillis  = 0;             //Current millis value
 unsigned char RxBuffer[RxMaxBuffSize] = {0};
 boolean MQTTSwitchBuffer[MaxSwitches] = {0};
 uint16_t SubPacketID = 0x0001;
@@ -165,6 +168,9 @@ boolean MoodAOff = false;
 /*Function Declarations*/
 void hal_uart_Init();
 boolean hal_uart_tx(char* pTxBuff, uint8_t utxCount);
+void TimedFunctionCaller_Init();
+void TimedFunctionCaller();
+void ReadSwitches();
 teESPstatus ESPStateMachine();
 void resetESP();
 teMQTTstatus MQTTStateMachine();

@@ -402,7 +402,6 @@ teMQTTstatus MQTTStateMachine()
 
     case eMQTTSuccessState:
       MQTTInitFlag = true;
-      publishIfMoodReq();
       eMQTTStatus = eMQTTSuccess;
       break;
 
