@@ -9,8 +9,6 @@ void setup()
   hal_uart_Init();
   delay(500);
 
-  /*MQTT_Init*/
-  while (MQTTStateMachine() != eMQTTSuccess); //TODO: use assert param function to assert parameters for all functions
   
   currMillis = millis();
   prevMillis = currMillis;
@@ -19,8 +17,11 @@ void setup()
 
 void loop()
 {
+  /*MQTT_Init*/
+  while (MQTTStateMachine() != eMQTTSuccess); //TODO: use assert param function to assert parameters for all functions
+  
   currMillis = millis();
-  if (currMillis - prevMillis >= 1000)
+  if (currMillis - prevMillis >= 60000)
   {
 //    Serial.println("pinging");
     pingToServer();

@@ -37,7 +37,7 @@
 
 #define MQTT_POS_ACK                      0x0
 
-#define MQTT_CONN_KEEPALIVE               (uint16_t)10 //no. of seconds for which connection is to be kept alive 
+#define MQTT_CONN_KEEPALIVE               (uint16_t)240 //no. of seconds for which connection is to be kept alive 
 
 #define MQTT_QOS_2                        (uint8_t)0x2 //Quality of service level 2
 #define MQTT_QOS_1                        (uint8_t)0x1 //Quality of service level 1
@@ -103,6 +103,8 @@ typedef enum
   eEspATE0Resp,
   eEspStationModeReq,
   eEspStationModeResp,
+  eEspCheckConnectionToAccessPointReq,
+  eEspCheckConnectionToAccessPointResp,
   eEspConnectToAccessPointReq,
   eEspConnectToAccessPointResp,
   eEspSingleConnModeReq,
@@ -153,14 +155,21 @@ boolean MQTTSwitchBuffer[MaxSwitches] = {0};
 uint16_t SubPacketID = 0x0001;
 uint16_t PubPacketID = 0x0001;
 uint8_t rxBufferCount = 0;
+uint8_t u8pingCount = 0;
 boolean ESPInitFlag = false;
 boolean MQTTInitFlag = false;
+boolean MoodChill = false;
+boolean MoodWork = false;
+boolean MoodAOff = false;
 
 /*Function Declarations*/
 void hal_uart_Init();
 boolean hal_uart_tx(char* pTxBuff, uint8_t utxCount);
-teMQTTstatus MQTTStateMachine();
 teESPstatus ESPStateMachine();
+void resetESP();
+teMQTTstatus MQTTStateMachine();
+void publishIfMoodReq();
+void resetMQTT();
 void connectToBroker(uint8_t u8connectFlags, unsigned char* ucClientID, unsigned char* ucUsername, unsigned char* ucPassword, uint16_t u16KeepAliveTimeS);
 void subscribeToTopic(char * ptrTopic, char * ptrTopic2, uint8_t uiQoS);
 void publishToTopic(char * ptrTopic, char* ptrData, uint8_t uiQoS, uint8_t u8RetainFlag);

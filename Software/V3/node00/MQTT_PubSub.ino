@@ -1,4 +1,13 @@
 
+static teMQTTstatus eMQTTStatus = eMQTTInProgress;
+static teMQTTState eMQTTstate = eMQTTInit;
+
+void resetMQTT()
+{
+  MQTTInitFlag = false;
+  eMQTTstate = eMQTTInit;
+  eMQTTStatus = eMQTTInProgress;
+}
 boolean bcheckConnectAck()
 {
   unsigned char* pRxBuffer = RxBuffer;
@@ -204,9 +213,9 @@ void publishToTopic(char * ptrTopic, char* ptrData, uint8_t uiQoS, uint8_t u8Ret
     *ptrpublishBuff++ = *ptrTopic++;
   charCounter += stringLen;
   //Packet ID
-  *ptrpublishBuff++ = (PubPacketID & 0xFF00);
-  *ptrpublishBuff++ = (PubPacketID & 0x00FF);
-  charCounter += 2;
+  //  *ptrpublishBuff++ = (PubPacketID & 0xFF00);
+  //  *ptrpublishBuff++ = (PubPacketID & 0x00FF);
+  //  charCounter += 2;
 
   /*Payload*/
   //Data
@@ -232,15 +241,69 @@ void pingToServer()
 
   *ptrpingBuff++ = ( MQTT_CTRL_PINGREQ | MQTT_CTRL_PINGREQ_FLAG );
   *ptrpingBuff = 0x00;                                              //Remaining length is zero
-
-  //  Serial.println(".");
+  if (u8pingCount > 2)
+  {
+    resetMQTT();
+    resetESP();
+    u8pingCount = 0;
+    return;
+  }
+  u8pingCount += 2;
+  //  Serial.print(F(".\r\n"));
   hal_uart_tx(pingBuff, 2);
+}
+
+void publishIfMoodReq()
+{
+  if (MoodAOff)
+  {
+    publishToTopic(MQTT_TOPIC2, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC3, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC4, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC5, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC6, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC7, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC8, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC10, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC11, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC12, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC13, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC14, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC15, "OFF", MQTT_QOS_0, MQTT_RETAIN);
+    MoodAOff = false;
+  }
+  if (MoodChill)
+  {
+    publishToTopic(MQTT_TOPIC3, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC4, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC5, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC6, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC7, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC8, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC10, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC11, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC13, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC14, "OFF", MQTT_QOS_0, MQTT_RETAIN);
+    MoodChill = false;
+  }
+  if (MoodWork)
+  {
+    publishToTopic(MQTT_TOPIC3, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC4, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC5, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC6, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC7, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC8, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC10, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC11, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC13, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC14, "OFF", MQTT_QOS_0, MQTT_RETAIN);
+    MoodWork = false;
+  }
 }
 
 teMQTTstatus MQTTStateMachine()
 {
-  static teMQTTstatus eMQTTStatus = eMQTTInProgress;
-  static teMQTTState eMQTTstate = eMQTTInit;
   static boolean bRetry = true;
 
   switch (eMQTTstate)
@@ -251,17 +314,17 @@ teMQTTstatus MQTTStateMachine()
       break;
 
     case eMQTTConnectReq:
-      connectToBroker((MQTT_CONN_USERNAMEFLAG | MQTT_CONN_PASSWORDFLAG | MQTT_CONN_CLEANSESSION), "Aniruddha", MQTT_USERNAME, MQTT_PASSWORD, MQTT_CONN_KEEPALIVE);
+      connectToBroker((MQTT_CONN_USERNAMEFLAG | MQTT_CONN_PASSWORDFLAG | MQTT_CONN_CLEANSESSION), "Ani", MQTT_USERNAME, MQTT_PASSWORD, MQTT_CONN_KEEPALIVE);
       eMQTTstate = eMQTTConnectACK;
-      Serial.println("Connecting to AdafruitIO MQTT Broker");
+      Serial.print(F("Connecting to AdafruitIO MQTT Broker\r\n"));
       break;
 
     case eMQTTConnectACK:
-      delay(500);
+      delay(1000);
       if (handleMQTTresponse(&bRetry, eMQTTConnectACK) == true)
       {
         eMQTTstate = eMQTTSubscribeReq;
-        Serial.println("Connection Successful");
+        Serial.print(F("Connection Successful\r\n"));
       }
       else if (bRetry == true)
       {
@@ -276,7 +339,7 @@ teMQTTstatus MQTTStateMachine()
       break;
 
     case eMQTTSubscribeReq:
-      Serial.println("Subscribing to topics");
+      Serial.print(F("Subscribing to topics\r\n"));
       subscribeToTopic((char*)MQTT_TOPIC1, MQTT_QOS_0);
       delay(500);
       subscribeToTopic((char*)MQTT_TOPIC2, MQTT_QOS_0);
@@ -310,11 +373,11 @@ teMQTTstatus MQTTStateMachine()
       break;
 
     case eMQTTSubscribeACK:
-      delay(4000);
+      delay(3000);
       if (handleMQTTresponse(&bRetry, eMQTTSubscribeACK) == true)
       {
         eMQTTstate = eMQTTSuccessState;
-        Serial.println("Subscription to all topics was successful");
+        Serial.print(F("Subscription to all topics was successful\r\n"));
       }
       else if (bRetry == true)
       {
@@ -322,7 +385,7 @@ teMQTTstatus MQTTStateMachine()
       }
       else
       {
-        Serial.println("Check code");
+        Serial.print(F("Check code\r\n"));
         while (1);
         //will be decided later
         //possibly recall esp state machine
@@ -339,6 +402,7 @@ teMQTTstatus MQTTStateMachine()
 
     case eMQTTSuccessState:
       MQTTInitFlag = true;
+      publishIfMoodReq();
       eMQTTStatus = eMQTTSuccess;
       break;
 

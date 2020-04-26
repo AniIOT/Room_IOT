@@ -38,7 +38,7 @@ boolean hal_uart_tx(char* pTxBuff, uint8_t utxCount)
 
 static void eRxInterruptHandler(uint8_t rxChar)
 {
-  if (!(ESPInitFlag && MQTTInitFlag))
+  if (!MQTTInitFlag)
   {
     if ((rxChar != '\n'))
     {
@@ -50,7 +50,11 @@ static void eRxInterruptHandler(uint8_t rxChar)
   else
   {
     if (!((rxBufferCount < 2) && ((rxChar == MQTT_CTRL_PINGRESP) || (rxChar == 0x00)))) //To ignore ping response
+    {
       RxBuffer[rxBufferCount++] = (unsigned char)rxChar;
+    }
+    else
+      u8pingCount = 0;
     //    Serial.print(rxBufferCount - 1);
     //    Serial.println((char)RxBuffer[rxBufferCount - 1]);
 
@@ -188,10 +192,52 @@ void hal_uart_decodeData()
   else if (RxBuffer[17] == 'M')                                  //MOOD
   {
     if (RxBuffer[21] == 'c')                                     //Chill Mood
-      Serial.println("Chill Mood");
+    {
+      MQTTSwitchBuffer[Yellow1] = true;
+      MQTTSwitchBuffer[Yellow2] = true;
+      MQTTSwitchBuffer[White1] = false;
+      MQTTSwitchBuffer[White2] = false;
+      MQTTSwitchBuffer[White3] = false;
+      MQTTSwitchBuffer[White4] = false;
+      MQTTSwitchBuffer[Passage] = false;
+      MQTTSwitchBuffer[Loft] = false;
+      MQTTSwitchBuffer[ToiletWhite] = false;
+      MQTTSwitchBuffer[ToiletYellow] = false;
+      MoodChill = true;
+      //      Serial.println(F("Chill Mood"));
+    }
     else if (RxBuffer[21] == 'w')                                //Work Mood
-      Serial.println("Work Mood");
+    {
+      MQTTSwitchBuffer[Yellow1] = false;
+      MQTTSwitchBuffer[Yellow2] = false;
+      MQTTSwitchBuffer[White1] = true;
+      MQTTSwitchBuffer[White2] = true;
+      MQTTSwitchBuffer[White3] = true;
+      MQTTSwitchBuffer[White4] = true;
+      MQTTSwitchBuffer[Passage] = true;
+      MQTTSwitchBuffer[Loft] = false;
+      MQTTSwitchBuffer[ToiletWhite] = false;
+      MQTTSwitchBuffer[ToiletYellow] = false;
+      MoodWork = true;
+      //      Serial.println(F("Work Mood"));
+    }
     else if (RxBuffer[21] == 'o')                                //All off
-      Serial.println("All OFF");
+    {
+      MQTTSwitchBuffer[Fan] = false;
+      MQTTSwitchBuffer[Yellow1] = false;
+      MQTTSwitchBuffer[Yellow2] = false;
+      MQTTSwitchBuffer[White1] = false;
+      MQTTSwitchBuffer[White2] = false;
+      MQTTSwitchBuffer[White3] = false;
+      MQTTSwitchBuffer[White4] = false;
+      MQTTSwitchBuffer[Exaust] = false;
+      MQTTSwitchBuffer[Passage] = false;
+      MQTTSwitchBuffer[Loft] = false;
+      MQTTSwitchBuffer[ToiletWhite] = false;
+      MQTTSwitchBuffer[ToiletYellow] = false;
+      MQTTSwitchBuffer[WaterHeater] = false;
+      MoodAOff = true;
+      //      Serial.println(F("All OFF"));
+    }
   }
 }
