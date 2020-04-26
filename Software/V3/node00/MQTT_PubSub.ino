@@ -314,13 +314,13 @@ teMQTTstatus MQTTStateMachine()
       break;
 
     case eMQTTConnectReq:
-      connectToBroker((MQTT_CONN_USERNAMEFLAG | MQTT_CONN_PASSWORDFLAG | MQTT_CONN_CLEANSESSION), "Ani", MQTT_USERNAME, MQTT_PASSWORD, MQTT_CONN_KEEPALIVE);
+      connectToBroker((MQTT_CONN_USERNAMEFLAG | MQTT_CONN_PASSWORDFLAG | MQTT_CONN_CLEANSESSION), "Aniruddha", MQTT_USERNAME, MQTT_PASSWORD, MQTT_CONN_KEEPALIVE);
       eMQTTstate = eMQTTConnectACK;
       Serial.print(F("Connecting to AdafruitIO MQTT Broker\r\n"));
       break;
 
     case eMQTTConnectACK:
-      delay(1000);
+      delay(2000);
       if (handleMQTTresponse(&bRetry, eMQTTConnectACK) == true)
       {
         eMQTTstate = eMQTTSubscribeReq;
@@ -332,6 +332,8 @@ teMQTTstatus MQTTStateMachine()
       }
       else
       {
+        resetMQTT();
+        resetESP();
         //will be decided later
         //possibly recall esp state machine
       }
@@ -373,7 +375,7 @@ teMQTTstatus MQTTStateMachine()
       break;
 
     case eMQTTSubscribeACK:
-      delay(3000);
+      delay(4000);
       if (handleMQTTresponse(&bRetry, eMQTTSubscribeACK) == true)
       {
         eMQTTstate = eMQTTSuccessState;
@@ -385,8 +387,10 @@ teMQTTstatus MQTTStateMachine()
       }
       else
       {
+        resetMQTT();
+        resetESP();
         Serial.print(F("Check code\r\n"));
-        while (1);
+        //        while (1);
         //will be decided later
         //possibly recall esp state machine
       }
