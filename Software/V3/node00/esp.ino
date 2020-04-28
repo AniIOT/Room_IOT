@@ -118,6 +118,7 @@ boolean handleRespose(boolean* pbRetry, teESPstate ehandleESPstate)
 teESPstatus ESPStateMachine()
 {
   static boolean bRetry = true;
+  static uint8_t iTime100ms = 0;
 
   switch (eESPstate)
   {
@@ -129,20 +130,24 @@ teESPstatus ESPStateMachine()
       break;
 
     case eEspATResp:
-      delay(100);
-      if (handleRespose(&bRetry , eEspATResp) == true)
+      if (iTime100ms >= 1)
       {
-        eESPstate = eEspATE0Req;
-        Serial.print(F("ESP-RESP-AT\r\n"));
+        if (handleRespose(&bRetry , eEspATResp) == true)
+        {
+          eESPstate = eEspATE0Req;
+          Serial.print(F("ESP-RESP-AT\r\n"));
+        }
+        else if (bRetry == true)
+        {
+          eESPstate = eEspATReq;
+        }
+        else
+        {
+          Serial.print(F("Check connection with ESP\r\n")); //print error if even after set number of retries ESP doesn't respond
+        }
+        iTime100ms = 0;
       }
-      else if (bRetry == true)
-      {
-        eESPstate = eEspATReq;
-      }
-      else
-      {
-        Serial.print(F("Check connection with ESP\r\n")); //print error if even after set number of retries ESP doesn't respond
-      }
+      iTime100ms++;
       break;
 
     case eEspATE0Req:
@@ -152,21 +157,25 @@ teESPstatus ESPStateMachine()
       break;
 
     case eEspATE0Resp:
-      delay(100);
-      if (handleRespose(&bRetry , eEspATE0Resp) == true)
+      if (iTime100ms >= 1)
       {
-        eESPstate = eEspStationModeReq;
-        Serial.print(F("ESP-RESP-ATE0\r\n"));
+        if (handleRespose(&bRetry , eEspATE0Resp) == true)
+        {
+          eESPstate = eEspStationModeReq;
+          Serial.print(F("ESP-RESP-ATE0\r\n"));
+        }
+        else if (bRetry == true)
+        {
+          eESPstate = eEspATE0Req;
+        }
+        else
+        {
+          eESPstate = eEspATReq;
+          Serial.print(F("Check connection with ESP\r\n")); //print error if even after set number of retries ESP doesn't respond
+        }
+        iTime100ms = 0;
       }
-      else if (bRetry == true)
-      {
-        eESPstate = eEspATE0Req;
-      }
-      else
-      {
-        eESPstate = eEspATReq;
-        Serial.print(F("Check connection with ESP\r\n")); //print error if even after set number of retries ESP doesn't respond
-      }
+      iTime100ms++;
       break;
 
     case eEspStationModeReq:
@@ -176,21 +185,25 @@ teESPstatus ESPStateMachine()
       break;
 
     case eEspStationModeResp:
-      delay(100);
-      if (handleRespose(&bRetry , eEspStationModeResp) == true)
+      if (iTime100ms >= 1)
       {
-        eESPstate = eEspCheckConnectionToAccessPointReq;
-        Serial.print(F("ESP-RESP-STA\r\n"));
+        if (handleRespose(&bRetry , eEspStationModeResp) == true)
+        {
+          eESPstate = eEspCheckConnectionToAccessPointReq;
+          Serial.print(F("ESP-RESP-STA\r\n"));
+        }
+        else if (bRetry == true)
+        {
+          eESPstate = eEspStationModeReq;
+        }
+        else
+        {
+          eESPstate = eEspATReq;
+          Serial.print(F("Check connection with ESP\r\n")); //print error if even after set number of retries ESP doesn't respond
+        }
+        iTime100ms = 0;
       }
-      else if (bRetry == true)
-      {
-        eESPstate = eEspStationModeReq;
-      }
-      else
-      {
-        eESPstate = eEspATReq;
-        Serial.print(F("Check connection with ESP\r\n")); //print error if even after set number of retries ESP doesn't respond
-      }
+      iTime100ms++;
       break;
 
     case eEspCheckConnectionToAccessPointReq:
@@ -200,16 +213,20 @@ teESPstatus ESPStateMachine()
       break;
 
     case eEspCheckConnectionToAccessPointResp:
-      delay(100);
-      if (handleRespose(&bRetry , eEspCheckConnectionToAccessPointResp) == true)
+      if (iTime100ms >= 1)
       {
-        eESPstate = eEspTransparentModeOffReq;
-        Serial.print(F("ESP-RESP-CHE\r\n"));
+        if (handleRespose(&bRetry , eEspCheckConnectionToAccessPointResp) == true)
+        {
+          eESPstate = eEspTransparentModeOffReq;
+          Serial.print(F("ESP-RESP-CHE\r\n"));
+        }
+        else
+        {
+          eESPstate = eEspConnectToAccessPointReq;
+        }
+        iTime100ms = 0;
       }
-      else 
-      {
-        eESPstate = eEspConnectToAccessPointReq;
-      }
+      iTime100ms++;
       break;
 
     case eEspConnectToAccessPointReq:
@@ -219,21 +236,25 @@ teESPstatus ESPStateMachine()
       break;
 
     case eEspConnectToAccessPointResp:
-      delay(7500);
-      if (handleRespose(&bRetry , eEspConnectToAccessPointResp) == true)
+      if (iTime100ms >= 75)
       {
-        eESPstate = eEspSingleConnModeReq;
-        Serial.print(F("ESP-RESP-CON\r\n"));
+        if (handleRespose(&bRetry , eEspConnectToAccessPointResp) == true)
+        {
+          eESPstate = eEspSingleConnModeReq;
+          Serial.print(F("ESP-RESP-CON\r\n"));
+        }
+        else if (bRetry == true)
+        {
+          eESPstate = eEspConnectToAccessPointReq;
+        }
+        else
+        {
+          eESPstate = eEspATReq;
+          Serial.print(F("Check connection with ESP\r\n")); //print error if even after set number of retries ESP doesn't respond
+        }
+        iTime100ms = 0;
       }
-      else if (bRetry == true)
-      {
-        eESPstate = eEspConnectToAccessPointReq;
-      }
-      else
-      {
-        eESPstate = eEspATReq;
-        Serial.print(F("Check connection with ESP\r\n")); //print error if even after set number of retries ESP doesn't respond
-      }
+      iTime100ms++;
       break;
 
     case eEspSingleConnModeReq:
@@ -243,21 +264,25 @@ teESPstatus ESPStateMachine()
       break;
 
     case eEspSingleConnModeResp:
-      delay(100);
-      if (handleRespose(&bRetry , eEspSingleConnModeResp) == true)
+      if (iTime100ms >= 1)
       {
-        eESPstate = eEspTransparentModeOffReq;
-        Serial.print(F("ESP-RESP-MUX\r\n"));
+        if (handleRespose(&bRetry , eEspSingleConnModeResp) == true)
+        {
+          eESPstate = eEspTransparentModeOffReq;
+          Serial.print(F("ESP-RESP-MUX\r\n"));
+        }
+        else if (bRetry == true)
+        {
+          eESPstate = eEspSingleConnModeReq;
+        }
+        else
+        {
+          eESPstate = eEspATReq;
+          Serial.print(F("Check connection with ESP\r\n")); //print error if even after set number of retries ESP doesn't respond
+        }
+        iTime100ms = 0;
       }
-      else if (bRetry == true)
-      {
-        eESPstate = eEspSingleConnModeReq;
-      }
-      else
-      {
-        eESPstate = eEspATReq;
-        Serial.print(F("Check connection with ESP\r\n")); //print error if even after set number of retries ESP doesn't respond
-      }
+      iTime100ms++;
       break;
 
     case eEspTransparentModeOffReq:
@@ -267,21 +292,25 @@ teESPstatus ESPStateMachine()
       break;
 
     case eEspTransparentModeOffResp:
-      delay(100);
-      if (handleRespose(&bRetry , eEspTransparentModeOffResp) == true)
+      if (iTime100ms >= 1)
       {
-        eESPstate = eEspSetupTCPReq;
-        Serial.print(F("ESP-RESP-PASS-OFF\r\n"));
+        if (handleRespose(&bRetry , eEspTransparentModeOffResp) == true)
+        {
+          eESPstate = eEspSetupTCPReq;
+          Serial.print(F("ESP-RESP-PASS-OFF\r\n"));
+        }
+        else if (bRetry == true)
+        {
+          eESPstate = eEspTransparentModeOffReq;
+        }
+        else
+        {
+          eESPstate = eEspATReq;
+          Serial.print(F("Check connection with ESP\r\n")); //print error if even after set number of retries ESP doesn't respond
+        }
+        iTime100ms = 0;
       }
-      else if (bRetry == true)
-      {
-        eESPstate = eEspTransparentModeOffReq;
-      }
-      else
-      {
-        eESPstate = eEspATReq;
-        Serial.print(F("Check connection with ESP\r\n")); //print error if even after set number of retries ESP doesn't respond
-      }
+      iTime100ms++;
       break;
 
     case eEspSetupTCPReq:
@@ -291,21 +320,25 @@ teESPstatus ESPStateMachine()
       break;
 
     case eEspSetupTCPResp:
-      delay(500);
-      if (handleRespose(&bRetry , eEspSetupTCPResp) == true)
+      if (iTime100ms >= 5)
       {
-        eESPstate = eEspTransparentModeOnReq;
-        Serial.print(F("ESP-RESP-TCP\r\n"));
+        if (handleRespose(&bRetry , eEspSetupTCPResp) == true)
+        {
+          eESPstate = eEspTransparentModeOnReq;
+          Serial.print(F("ESP-RESP-TCP\r\n"));
+        }
+        else if (bRetry == true)
+        {
+          eESPstate = eEspSetupTCPReq;
+        }
+        else
+        {
+          eESPstate = eEspATReq;
+          Serial.print(F("Check connection with ESP\r\n")); //print error if even after set number of retries ESP doesn't respond
+        }
+        iTime100ms = 0;
       }
-      else if (bRetry == true)
-      {
-        eESPstate = eEspSetupTCPReq;
-      }
-      else
-      {
-        eESPstate = eEspATReq;
-        Serial.print(F("Check connection with ESP\r\n")); //print error if even after set number of retries ESP doesn't respond
-      }
+      iTime100ms++;
       break;
 
     case eEspTransparentModeOnReq:
@@ -315,21 +348,25 @@ teESPstatus ESPStateMachine()
       break;
 
     case eEspTransparentModeOnResp:
-      delay(100);
-      if (handleRespose(&bRetry , eEspTransparentModeOnResp) == true)
+      if (iTime100ms >= 1)
       {
-        eESPstate = eEspSendReq;
-        Serial.print(F("ESP-RESP-PASS-ON\r\n"));
+        if (handleRespose(&bRetry , eEspTransparentModeOnResp) == true)
+        {
+          eESPstate = eEspSendReq;
+          Serial.print(F("ESP-RESP-PASS-ON\r\n"));
+        }
+        else if (bRetry == true)
+        {
+          eESPstate = eEspTransparentModeOnReq;
+        }
+        else
+        {
+          eESPstate = eEspexittransparentmodeReq;
+          Serial.print(F("Check connection with ESP\r\n")); //print error if even after set number of retries ESP doesn't respond
+        }
+        iTime100ms = 0;
       }
-      else if (bRetry == true)
-      {
-        eESPstate = eEspTransparentModeOnReq;
-      }
-      else
-      {
-        eESPstate = eEspexittransparentmodeReq;
-        Serial.print(F("Check connection with ESP\r\n")); //print error if even after set number of retries ESP doesn't respond
-      }
+      iTime100ms++;
       break;
 
     case eEspSendReq:
@@ -339,21 +376,25 @@ teESPstatus ESPStateMachine()
       break;
 
     case eEspSendResp:
-      delay(100);
-      if (handleRespose(&bRetry , eEspSendResp) == true)
+      if (iTime100ms >= 1)
       {
-        eESPstate = eEspSuccessState;
-        Serial.print(F("ESP-RESP-SEND\r\n"));
+        if (handleRespose(&bRetry , eEspSendResp) == true)
+        {
+          eESPstate = eEspSuccessState;
+          Serial.print(F("ESP-RESP-SEND\r\n"));
+        }
+        else if (bRetry == true)
+        {
+          eESPstate = eEspSendReq;
+        }
+        else
+        {
+          eESPstate = eEspexittransparentmodeReq;
+          Serial.print(F("Check connection with ESP\r\n")); //print error if even after set number of retries ESP doesn't respond
+        }
+        iTime100ms = 0;
       }
-      else if (bRetry == true)
-      {
-        eESPstate = eEspSendReq;
-      }
-      else
-      {
-        eESPstate = eEspexittransparentmodeReq;
-        Serial.print(F("Check connection with ESP\r\n")); //print error if even after set number of retries ESP doesn't respond
-      }
+      iTime100ms++;
       break;
 
     case eEspexittransparentmodeReq:
@@ -364,20 +405,24 @@ teESPstatus ESPStateMachine()
       break;
 
     case eEspexittransparentmodeResp:
-      delay(500);
-      if (handleRespose(&bRetry , eEspexittransparentmodeResp) == true)
+      if (iTime100ms >= 5)
       {
-        eESPstate = eEspATReq;
-        Serial.print(F("ESP-RESP-EXT\r\n"));
+        if (handleRespose(&bRetry , eEspexittransparentmodeResp) == true)
+        {
+          eESPstate = eEspATReq;
+          Serial.print(F("ESP-RESP-EXT\r\n"));
+        }
+        else if (bRetry == true)
+        {
+          eESPstate = eEspexittransparentmodeReq;
+        }
+        else
+        {
+          eESPstate = eEspATReq;
+        }
+        iTime100ms = 0;
       }
-      else if (bRetry == true)
-      {
-        eESPstate = eEspexittransparentmodeReq;
-      }
-      else
-      {
-        eESPstate = eEspATReq;
-      }
+      iTime100ms++;
       break;
 
     case eEspSuccessState:

@@ -150,9 +150,10 @@ typedef enum
   eMQTTSuccess,
 } teMQTTstatus;
 
-static unsigned long prevMillis100mstask = 0;     //Switches debouncing
-static unsigned long prevMillis10000mstask = 0;   //Ping to server
-static unsigned long currMillis  = 0;             //Current millis value
+unsigned long prevMillis100mstask = 0;        //MQTT State Machine
+unsigned long prevMillis10000mstask = 0;      //Ping to server
+unsigned long prevMillis50mstask = 0;         //Read Switches
+unsigned long currMillis  = 0;                //Current millis value
 unsigned char RxBuffer[RxMaxBuffSize] = {0};
 boolean MQTTSwitchBuffer[MaxSwitches] = {0};
 uint16_t SubPacketID = 0x0001;

@@ -13,10 +13,10 @@ void setup()
 void loop()
 {
   /*MQTT_Init*/
-  while (MQTTStateMachine() != eMQTTSuccess); //TODO: use assert param function to assert parameters for all functions
+//  while (MQTTStateMachine() != eMQTTSuccess); //TODO: use assert param function to assert parameters for all functions
 
   //Publish switch status if mood request is received
-  publishIfMoodReq();
+//  publishIfMoodReq();
 
   //Call all functions according to alloted time
   TimedFunctionCaller();

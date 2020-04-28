@@ -305,6 +305,7 @@ void publishIfMoodReq()
 teMQTTstatus MQTTStateMachine()
 {
   static boolean bRetry = true;
+  static uint8_t iTime100ms = 0;
 
   switch (eMQTTstate)
   {
@@ -320,24 +321,27 @@ teMQTTstatus MQTTStateMachine()
       break;
 
     case eMQTTConnectACK:
-      delay(2000);
-      if (handleMQTTresponse(&bRetry, eMQTTConnectACK) == true)
+      if (iTime100ms >= 20)
       {
-        eMQTTstate = eMQTTSubscribeReq;
-        Serial.print(F("Connection Successful\r\n"));
+        if (handleMQTTresponse(&bRetry, eMQTTConnectACK) == true)
+        {
+          eMQTTstate = eMQTTSubscribeReq;
+          Serial.print(F("Connection Successful\r\n"));
+        }
+        else if (bRetry == true)
+        {
+          eMQTTstate = eMQTTConnectReq;
+        }
+        else
+        {
+          resetMQTT();
+          resetESP();
+          //will be decided later
+          //possibly recall esp state machine
+        }
+        iTime100ms = 0;
       }
-      else if (bRetry == true)
-      {
-        eMQTTstate = eMQTTConnectReq;
-      }
-      else
-      {
-        resetMQTT();
-        resetESP();
-        //will be decided later
-        //possibly recall esp state machine
-      }
-
+      iTime100ms++;
       break;
 
     case eMQTTSubscribeReq:
@@ -375,25 +379,29 @@ teMQTTstatus MQTTStateMachine()
       break;
 
     case eMQTTSubscribeACK:
-      delay(4000);
-      if (handleMQTTresponse(&bRetry, eMQTTSubscribeACK) == true)
+      if (iTime100ms >= 40)
       {
-        eMQTTstate = eMQTTSuccessState;
-        Serial.print(F("Subscription to all topics was successful\r\n"));
+        if (handleMQTTresponse(&bRetry, eMQTTSubscribeACK) == true)
+        {
+          eMQTTstate = eMQTTSuccessState;
+          Serial.print(F("Subscription to all topics was successful\r\n"));
+        }
+        else if (bRetry == true)
+        {
+          eMQTTstate = eMQTTSubscribeReq;
+        }
+        else
+        {
+          resetMQTT();
+          resetESP();
+          Serial.print(F("Check code\r\n"));
+          //        while (1);
+          //will be decided later
+          //possibly recall esp state machine
+        }
+        iTime100ms = 0;
       }
-      else if (bRetry == true)
-      {
-        eMQTTstate = eMQTTSubscribeReq;
-      }
-      else
-      {
-        resetMQTT();
-        resetESP();
-        Serial.print(F("Check code\r\n"));
-        //        while (1);
-        //will be decided later
-        //possibly recall esp state machine
-      }
+      iTime100ms++;
       break;
 
     case eMQTTPublishReq:
@@ -406,6 +414,7 @@ teMQTTstatus MQTTStateMachine()
 
     case eMQTTSuccessState:
       MQTTInitFlag = true;
+      publishIfMoodReq();
       eMQTTStatus = eMQTTSuccess;
       break;
 

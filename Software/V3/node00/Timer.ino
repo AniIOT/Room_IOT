@@ -2,23 +2,35 @@ void TimedFunctionCaller_Init()
 {
   currMillis = millis();
   prevMillis10000mstask = currMillis;
-  prevMillis100mstask = currMillis;
+  prevMillis100mstask   = currMillis;
+  prevMillis50mstask    = currMillis;
   rxBufferCount = 0;
 }
 
 void TimedFunctionCaller()
 {
   currMillis = millis();
-  if (currMillis - prevMillis10000mstask >= 10000)
+
+  if (currMillis - prevMillis50mstask >= 50)
   {
-    //    Serial.println("pinging");
-    pingToServer();
-    prevMillis10000mstask = currMillis;
+    //    ReadSwitches();
+    prevMillis50mstask = currMillis;
   }
 
   if (currMillis - prevMillis100mstask >= 100)
   {
-    ReadSwitches();
+    MQTTStateMachine();
     prevMillis100mstask = currMillis;
+  }
+
+  if (currMillis - prevMillis10000mstask >= 10000)
+  {
+    //    Serial.println("pinging");
+    if (MQTTInitFlag)
+    {
+      Serial.println(F("10s task"));
+      pingToServer();
+    }
+    prevMillis10000mstask = currMillis;
   }
 }
