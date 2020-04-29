@@ -160,6 +160,7 @@ uint16_t SubPacketID = 0x0001;
 uint16_t PubPacketID = 0x0001;
 uint8_t rxBufferCount = 0;
 uint8_t u8pingCount = 0;
+uint8_t subscribeCount = 0;
 boolean ESPInitFlag = false;
 boolean MQTTInitFlag = false;
 boolean MoodChill = false;

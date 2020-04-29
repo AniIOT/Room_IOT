@@ -7,6 +7,7 @@ void resetMQTT()
   MQTTInitFlag = false;
   eMQTTstate = eMQTTInit;
   eMQTTStatus = eMQTTInProgress;
+  subscribeCount = 0;
 }
 boolean bcheckConnectAck()
 {
@@ -29,10 +30,10 @@ boolean bcheckSubscribeAck()
   {
     if (*pRxBuffer == MQTT_CTRL_SUBACK && *(++pRxBuffer) == (rxBufferCount - 2) && *(++pRxBuffer) == (SubPacketID & 0xFF00) && *(++pRxBuffer) == (SubPacketID & 0x00FF) && *(++pRxBuffer) == MQTT_POS_ACK)
     {
-      if (SubPacketID == 0xFFFF)
-        SubPacketID = 0;
-      else
-        SubPacketID++;
+      //      if (SubPacketID == 0xFFFF)
+      //        SubPacketID = 0;
+      //      else
+      //        SubPacketID++;
       return true;
     }
     pRxBuffer++;
@@ -321,7 +322,7 @@ teMQTTstatus MQTTStateMachine()
       break;
 
     case eMQTTConnectACK:
-      if (iTime100ms >= 20)
+      if (iTime100ms >= 25)
       {
         if (handleMQTTresponse(&bRetry, eMQTTConnectACK) == true)
         {
@@ -345,46 +346,54 @@ teMQTTstatus MQTTStateMachine()
       break;
 
     case eMQTTSubscribeReq:
-      Serial.print(F("Subscribing to topics\r\n"));
-      subscribeToTopic((char*)MQTT_TOPIC1, MQTT_QOS_0);
-      delay(500);
-      subscribeToTopic((char*)MQTT_TOPIC2, MQTT_QOS_0);
-      delay(500);
-      subscribeToTopic((char*)MQTT_TOPIC3, MQTT_QOS_0);
-      delay(500);
-      subscribeToTopic((char*)MQTT_TOPIC4, MQTT_QOS_0);
-      delay(500);
-      subscribeToTopic((char*)MQTT_TOPIC5, MQTT_QOS_0);
-      delay(500);
-      subscribeToTopic((char*)MQTT_TOPIC6, MQTT_QOS_0);
-      delay(500);
-      subscribeToTopic((char*)MQTT_TOPIC7, MQTT_QOS_0);
-      delay(500);
-      subscribeToTopic((char*)MQTT_TOPIC8, MQTT_QOS_0);
-      delay(500);
-      subscribeToTopic((char*)MQTT_TOPIC9, MQTT_QOS_0);
-      delay(500);
-      subscribeToTopic((char*)MQTT_TOPIC10, MQTT_QOS_0);
-      delay(500);
-      subscribeToTopic((char*)MQTT_TOPIC11, MQTT_QOS_0);
-      delay(500);
-      subscribeToTopic((char*)MQTT_TOPIC12, MQTT_QOS_0);
-      delay(500);
-      subscribeToTopic((char*)MQTT_TOPIC13, MQTT_QOS_0);
-      delay(500);
-      subscribeToTopic((char*)MQTT_TOPIC14, MQTT_QOS_0);
-      delay(500);
-      subscribeToTopic((char*)MQTT_TOPIC15, MQTT_QOS_0);
+      Serial.print(F("Subscribing to topic "));
+      Serial.println(subscribeCount);
+      if (subscribeCount == 0)
+        subscribeToTopic((char*)MQTT_TOPIC1, MQTT_QOS_0);
+      if (subscribeCount == 1)
+        subscribeToTopic((char*)MQTT_TOPIC2, MQTT_QOS_0);
+      if (subscribeCount == 2)
+        subscribeToTopic((char*)MQTT_TOPIC3, MQTT_QOS_0);
+      if (subscribeCount == 3)
+        subscribeToTopic((char*)MQTT_TOPIC4, MQTT_QOS_0);
+      if (subscribeCount == 4)
+        subscribeToTopic((char*)MQTT_TOPIC5, MQTT_QOS_0);
+      if (subscribeCount == 5)
+        subscribeToTopic((char*)MQTT_TOPIC6, MQTT_QOS_0);
+      if (subscribeCount == 6)
+        subscribeToTopic((char*)MQTT_TOPIC7, MQTT_QOS_0);
+      if (subscribeCount == 7)
+        subscribeToTopic((char*)MQTT_TOPIC8, MQTT_QOS_0);
+      if (subscribeCount == 8)
+        subscribeToTopic((char*)MQTT_TOPIC9, MQTT_QOS_0);
+      if (subscribeCount == 9)
+        subscribeToTopic((char*)MQTT_TOPIC10, MQTT_QOS_0);
+      if (subscribeCount == 10)
+        subscribeToTopic((char*)MQTT_TOPIC11, MQTT_QOS_0);
+      if (subscribeCount == 11)
+        subscribeToTopic((char*)MQTT_TOPIC12, MQTT_QOS_0);
+      if (subscribeCount == 12)
+        subscribeToTopic((char*)MQTT_TOPIC13, MQTT_QOS_0);
+      if (subscribeCount == 13)
+        subscribeToTopic((char*)MQTT_TOPIC14, MQTT_QOS_0);
+      if (subscribeCount == 14)
+        subscribeToTopic((char*)MQTT_TOPIC15, MQTT_QOS_0);
       eMQTTstate = eMQTTSubscribeACK;
       break;
 
     case eMQTTSubscribeACK:
-      if (iTime100ms >= 40)
+      if (iTime100ms >= 6)
       {
         if (handleMQTTresponse(&bRetry, eMQTTSubscribeACK) == true)
         {
-          eMQTTstate = eMQTTSuccessState;
-          Serial.print(F("Subscription to all topics was successful\r\n"));
+          if (subscribeCount >= 14)
+          {
+            eMQTTstate = eMQTTSuccessState;
+            Serial.print(F("Subscription to all topics was successful\r\n"));
+          }
+          else
+            eMQTTstate = eMQTTSubscribeReq;
+          subscribeCount++;
         }
         else if (bRetry == true)
         {
