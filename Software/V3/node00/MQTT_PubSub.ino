@@ -258,46 +258,46 @@ void publishIfMoodReq()
 {
   if (MoodAOff)
   {
-    publishToTopic(MQTT_TOPIC2, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC3, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC4, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC5, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC6, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC7, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC8, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC10, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC11, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC12, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC13, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC14, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC2, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC3, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC4, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC5, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC6, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC7, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC8, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC10, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC11, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC12, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC13, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC14, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
     publishToTopic(MQTT_TOPIC15, "OFF", MQTT_QOS_0, MQTT_RETAIN);
     MoodAOff = false;
   }
   if (MoodChill)
   {
-    publishToTopic(MQTT_TOPIC3, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC4, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC5, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC6, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC7, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC8, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC10, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC11, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC13, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC3, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC4, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC5, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC6, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC7, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC8, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC10, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC11, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC13, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
     publishToTopic(MQTT_TOPIC14, "OFF", MQTT_QOS_0, MQTT_RETAIN);
     MoodChill = false;
   }
   if (MoodWork)
   {
-    publishToTopic(MQTT_TOPIC3, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC4, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC5, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC6, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC7, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC8, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC10, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC11, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
-    publishToTopic(MQTT_TOPIC13, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(2);
+    publishToTopic(MQTT_TOPIC3, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC4, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC5, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC6, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC7, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC8, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC10, "ON", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC11, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
+    publishToTopic(MQTT_TOPIC13, "OFF", MQTT_QOS_0, MQTT_RETAIN);    delay(5);
     publishToTopic(MQTT_TOPIC14, "OFF", MQTT_QOS_0, MQTT_RETAIN);
     MoodWork = false;
   }

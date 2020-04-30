@@ -13,7 +13,7 @@ void TimedFunctionCaller()
 
   if (currMillis - prevMillis50mstask >= 50)
   {
-    //    ReadSwitches();
+    ReadSwitches();
     prevMillis50mstask = currMillis;
   }
 
@@ -25,9 +25,9 @@ void TimedFunctionCaller()
 
   if (currMillis - prevMillis10000mstask >= 10000)
   {
-    //    Serial.println("pinging");
     if (MQTTInitFlag)
     {
+    //    Serial.println("pinging");
       Serial.println(F("10s task"));
       pingToServer();
     }

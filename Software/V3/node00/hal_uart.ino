@@ -1,14 +1,3 @@
-#include <NeoSWSerial.h>
-
-/*Software Serial Baudrate*/
-#define ESP_UART_BAUD                   9600
-
-/*Hardware Serial Baudrate*/
-#define DEBUG_UART_BAUD                 9600
-
-/*Software UART pins - ESP8266 pins*/
-#define ESP_RX                          ((uint8_t)0x04)  //esp uart        D4
-#define ESP_TX                          ((uint8_t)0x05)  //esp uart        D5
 
 NeoSWSerial eSerial(ESP_RX, ESP_TX);    //Software serial object
 
