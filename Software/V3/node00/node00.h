@@ -10,6 +10,11 @@
 #define GPIOD_S1                 ((uint8_t)0x80)  //mux select line1 D7
 #define GPIOB_S2                 ((uint8_t)0x01)  //mux select line2 D8
 #define GPIOD_OP                 ((uint8_t)0x01)  //mux output line  D0
+#define GPIOD_DS0                ((uint8_t)0x06)  //mux select line0 D6
+#define GPIOD_DS1                ((uint8_t)0x07)  //mux select line1 D7
+#define GPIOB_DS2                ((uint8_t)0x08)  //mux select line2 D8
+#define GPIOD_DOP                ((uint8_t)0x00)  //mux output line  D0
+
 #if testenable
 #define muxOPpin (PIND & 0x08) >> 3
 #else
