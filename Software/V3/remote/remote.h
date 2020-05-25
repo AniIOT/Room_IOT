@@ -3,17 +3,6 @@
 /*Global Declarations*/
 
 /*Macro Declarations*/
-#define testenable 1
-
-/*switch pins*/
-#define GPIOD_S0                 ((uint8_t)0x40)  //mux select line0 D6
-#define GPIOD_S1                 ((uint8_t)0x80)  //mux select line1 D7
-#define GPIOB_S2                 ((uint8_t)0x01)  //mux select line2 D8
-#define GPIOD_OP                 ((uint8_t)0x01)  //mux output line  D0
-#define GPIOD_DS0                ((uint8_t)0x06)  //mux select line0 D6
-#define GPIOD_DS1                ((uint8_t)0x07)  //mux select line1 D7
-#define GPIOB_DS2                ((uint8_t)0x08)  //mux select line2 D8
-#define GPIOD_DOP                ((uint8_t)0x00)  //mux output line  D0
 
 /*Software Serial Baudrate*/
 #define ESP_UART_BAUD                     9600
@@ -22,31 +11,8 @@
 /*Software UART pins - ESP8266 pins*/
 #define ESP_RX                            ((uint8_t)0x04)  //esp uart        D4
 #define ESP_TX                            ((uint8_t)0x05)  //esp uart        D5
-/*relay pins*/
-#define GPIOD_R1                          ((uint8_t)0x04)  //output relay 1  D2
-#define GPIOD_R2                          ((uint8_t)0x08)  //output relay 2  D3
-#define GPIOC_R3                          ((uint8_t)0x20)  //output relay 3  D19 no AF
-#define GPIOC_R4                          ((uint8_t)0x10)  //output relay 4  D18 no AF
-#define GPIOC_R5                          ((uint8_t)0x08)  //output relay 5  D17 no AF
-#define GPIOC_R6                          ((uint8_t)0x04)  //output relay 6  D16 no AF
-#define GPIOC_R7                          ((uint8_t)0x02)  //output relay 7  D15 no AF
-#define GPIOC_R8                          ((uint8_t)0x01)  //output relay 8  D14 no AF
-/*SPI pins - NRF24L01 pins*/
-#define GPIOB_CE                          ((uint8_t)0x02)  //nrf comm ce     D9
-#define GPIOB_CSN                         ((uint8_t)0x04)  //nrf comm csn    D10
-#define GPIOB_MOSI                        ((uint8_t)0x08)  //nrf spi mosi    D11
-#define GPIOB_MISO                        ((uint8_t)0x10)  //nrf spi miso    D12
-#define GPIOB_SCK                         ((uint8_t)0x20)  //nrf spi sck     D13
-
-#if testenable
-#define muxOPpin (PIND & GPIOD_R2) >> 3
-#else
-#define muxOPpin (PIND & GPIOD_OP)
-#endif
-
 
 #define RxMaxBuffSize                     (uint8_t)200
-#define RxDataMaxBuffSize                 (uint8_t)10
 
 #define MQTT_CTRL_CONNECT                 0x10
 #define MQTT_CTRL_CONNECTACK              0x20
@@ -118,25 +84,6 @@
 #define MQTT_TOPIC15                       "AniIOT/feeds/toil.l3"
 
 
-
-typedef enum
-{
-  Fan,
-  Yellow1,
-  Yellow2,
-  White1,
-  White2,
-  White3,
-  White4,
-  Passage,
-  Loft,
-  Exaust,
-  ToiletWhite,
-  ToiletYellow,
-  WaterHeater,
-  MaxSwitches,
-} teSwitchCategory;
-
 /*Variable Declarations*/
 typedef enum
 {
@@ -198,7 +145,6 @@ unsigned long prevMillis10000mstask = 0;      //Ping to server
 unsigned long prevMillis50mstask = 0;         //Read Switches
 unsigned long currMillis  = 0;                //Current millis value
 unsigned char RxBuffer[RxMaxBuffSize] = {0};
-boolean MQTTSwitchBuffer[MaxSwitches] = {0};
 uint16_t SubPacketID = 0x0001;
 uint16_t PubPacketID = 0x0001;
 uint8_t rxBufferCount = 0;
